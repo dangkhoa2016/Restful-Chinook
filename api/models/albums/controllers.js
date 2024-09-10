@@ -1,9 +1,10 @@
 const dbHelpers = require('../../libs/db-helpers');
 const controllerHelpers = require('../../libs/controller-helpers');
+const tablesMapping = require('../../libs/tables-mapping');
 
 const tableName = 'albums';
-const columns = ['album_id', 'title', 'artist_id'];
-const primaryKey = 'album_id';
+const columns = tablesMapping[tableName].columns;
+const primaryKey = tablesMapping[tableName].primaryKey;
 
 const controllers = {
   getAll: async (req, res) => {
@@ -12,7 +13,8 @@ const controllers = {
     res.status(status).json(result);
   },
   getOne: async (req, res) => {
-    const { status, result } = await dbHelpers.getById(tableName, { [primaryKey]: req.params.id });
+    const { id } = req.params;
+    const { status, result } = await dbHelpers.getById(tableName, { [primaryKey]: id });
 
     res.status(status).json(result);
   },

@@ -16,6 +16,7 @@ router.use('/invoices', require('./models/invoices'));
 router.use('/media-types', require('./models/media-types'));
 router.use('/playlists', require('./models/playlists'));
 router.use('/tracks', require('./models/tracks'));
+router.use('/associations', require('./models/associations'));
 
 // router.use('/user-playlists', require('./models/user-playlists'));
 // router.use('/user-tracks', require('./models/user-tracks'));

@@ -26,9 +26,14 @@ app.use(morgan('combined', {
 // log to console
 app.use(morgan('dev'));
 
-app.use('/', express.static(path.join(__dirname, 'client')));
+app.use('/client', express.static(path.join(__dirname, 'client')));
 
 app.use('/api', api);
+
+app.use('/', (req, res) => {
+  const indexHtml = path.join(__dirname, 'client/index.html');
+  res.sendFile(indexHtml);
+});
 
 app.use(function (err, req, res, next) {
   console.error(err.stack);

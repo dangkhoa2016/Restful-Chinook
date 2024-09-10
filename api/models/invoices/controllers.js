@@ -1,15 +1,10 @@
 const dbHelpers = require('../../libs/db-helpers');
 const controllerHelpers = require('../../libs/controller-helpers');
+const tablesMapping = require('../../libs/tables-mapping');
 
 const tableName = 'invoices';
-const columns = [
-  'invoice_id', 'customer_id',
-  'invoice_date', 'billing_address',
-  'billing_city', 'billing_state',
-  'billing_country', 'billing_postal_code',
-  'total'
-];
-const primaryKey = 'invoice_id';
+const columns = tablesMapping[tableName].columns;
+const primaryKey = tablesMapping[tableName].primaryKey;
 
 const controllers = {
   getAll: async (req, res) => {

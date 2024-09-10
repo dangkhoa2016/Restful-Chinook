@@ -18,8 +18,14 @@ const extractQuery = (query) => {
   };
 };
 
+const sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); };
+
 class Helper {
   async getAll(tableName, options = {}) {
+
+    // console.log('[getAll] sleep 4s');
+    // await sleep(4000);
+
     let { limit, offset } = options;
     if (!limit)
       limit = 10;
@@ -39,7 +45,6 @@ class Helper {
       console.log('total', total);
 
       return { status: 200, result: { "rows": rows, "total": total["COUNT(*)"] } };
-
     } catch (ex) {
       return { status: 500, result: { "error": ex.message } };
     }

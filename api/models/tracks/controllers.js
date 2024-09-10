@@ -1,14 +1,10 @@
 const dbHelpers = require('../../libs/db-helpers');
 const controllerHelpers = require('../../libs/controller-helpers');
+const tablesMapping = require('../../libs/tables-mapping');
 
 const tableName = 'tracks';
-const columns = [
-  'genre_id', 'track_id',
-  'name', 'album_id', 'media_type_id',
-  'composer', 'milliseconds',
-  'bytes', 'unit_price'
-];
-const primaryKey = 'track_id';
+const columns = tablesMapping[tableName].columns;
+const primaryKey = tablesMapping[tableName].primaryKey;
 
 const controllers = {
   getAll: async (req, res) => {
