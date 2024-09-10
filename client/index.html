@@ -5,63 +5,54 @@
   <meta charset="utf-8" />
   <title>Resful Chinook</title>
 
-  <link rel="stylesheet" href="./style.css">
   <!-- add bootstrap 5 css with integrity hash -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha256-MBffSnbbXwHCuZtgPYiwMQbfE7z+GOZ7fBPCNB06Z98=" crossorigin="anonymous">
 
-  <style>
-    .cursor-pointer {
-      cursor: pointer;
-    }
-    .bg-gray {
-      background-color: #898f94;
-      color: #fff;
-    }
-    .rounded-table {
-      border-radius: 10px; /* Adjust the border-radius as needed */
-      overflow: hidden;
-    }
-  </style>
+  <link rel="stylesheet" href="/src/assets/style.css">
 </head>
 
 </head>
 
 <body>
-  <div class="container-fluid mt-4">
-    <h1 id='root' class="text-center mb-4">Resful Chinook</h1>
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="calendar3" viewBox="0 0 16 16">
+      <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+      <path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+    </symbol>
 
-    <div class="row">
-      <!-- two columns 4/8 -->
-      <div class="col-md-4">
-        <!-- list of models -->
-        <ul id='models' class="list-group">
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span class="model-name">Artists</span>
-            <button class="btn btn-primary show-records">Show Records</button>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span class="model-name">Albums</span>
-            <button class="btn btn-primary show-records">Show Records</button>
-          </li>
-        </ul>
-      </div>
-      <div class="col-md-8 mt-4 mt-sm-0">
-        <div class="card table-responsive">
-          <div class="card-header bg-success text-white">Records</div>
-          <table id="records" class="rounded-table table table-bordered mb-0 table-striped">
-          </table>
-          <ul id='pagination' class='pagination mt-4'></ul>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="mt-4 p-4 bg-gray rounded mx-3 d-none">
-    <h4>Detail as json</h4>
-    <pre id="detail"></pre>
-  </div>
+    <symbol id="error-load" viewBox="0 0 16 16">
+			<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+  	</symbol>
 
+    <symbol id="reload" viewBox="0 0 16 16">
+			<path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z"></path>
+		</symbol>
 
-  <script src='./app/init.js'></script>
+    <symbol id="scroll-top" viewBox="0 0 16 16">
+			<path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
+		</symbol>
+  </svg>
+
+  <div id="app"></div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "sfc-loader": "https://cdn.jsdelivr.net/npm/vue3-sfc-loader@0.8.4/+esm",
+        "bootstrap": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/+esm",
+        "mitt": "https://cdn.jsdelivr.net/npm/mitt@3.0.1/+esm",
+        "axios": "https://cdn.jsdelivr.net/npm/axios@1.6.5/+esm",
+        "axios-mock-adapter": "https://cdn.jsdelivr.net/npm/axios-mock-adapter@1.22.0/+esm",
+        "dayjs": "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/+esm",
+        "dayjsLocalizedFormat": "https://unpkg.com/dayjs@1.8.9/esm/plugin/localizedFormat/index.js",
+        "change-case": "https://cdn.jsdelivr.net/npm/change-case@5.4.4/+esm",
+        "currency.js": "https://cdn.jsdelivr.net/npm/currency.js@2.0.4/+esm",
+        "pluralize": "https://cdn.jsdelivr.net/npm/pluralize@8.0.0/+esm"
+      }
+    }
+  </script>
+  <script type='module' src='/src/app.js'></script>
 </body>
 
 </html>

@@ -562,7 +562,7 @@ curl -s "http://localhost:5000/api/employees/1" | jq
 }
 
 # create an employee
-curl -H "Content-Type: application/json" -d '{"last_name": "Johnson", "first_name": "Tyler", 
+curl -H "Content-Type: application/json" -d '{"last_name": "Johnson", "first_name": "Tyler",
 "title": "Sales Manager", "reports_to": 1, "birth_date": "1980-01-01", "hire_date": "2010-01-01",
 "address": "123 Main St", "city": "New York", "state": "NY", "country": "USA", "postal_code": "10001",
 "phone": "(123) 456-7890", "fax": "(123) 456-7891", "email": "tyler@chinookcorp.com"}' \
@@ -1314,4 +1314,238 @@ curl -X PUT -H "Content-Type: application/json" -d \
 curl -X DELETE http://localhost:5000/api/tracks/1 | jq
 {
   "1": "Deleted"
+}
+
+# ----------------------------------------
+# test associations
+curl -s "http://localhost:5000/api/associations?model=albums&id=1&action=belongto" | jq
+[
+  {
+    "name": "artists",
+    "record": {
+      "artist_id": 1,
+      "name": "AC/DC"
+    }
+  }
+]
+
+curl -s "http://localhost:5000/api/associations?model=tracks&id=1&action=belongto" | jq
+[
+  {
+    "name": "albums",
+    "record": {
+      "album_id": 1,
+      "title": "For Those About To Rock We Salute You",
+      "artist_id": 1
+    }
+  },
+  {
+    "name": "genres",
+    "record": {
+      "genre_id": 1,
+      "name": "Rock"
+    }
+  },
+  {
+    "name": "media_types",
+    "record": {
+      "media_type_id": 1,
+      "name": "MPEG audio file"
+    }
+  }
+]
+
+curl -s "http://localhost:5000/api/associations?model=albu1ms&id=1&action=belongto" | jq
+{
+  "message": "Invalid model"
+}
+
+curl -s "http://localhost:5000/api/associations?model=albums&id=1&action=hasmany" | jq
+[
+  {
+    "name": "tracks",
+    "record": {
+      "rows": [
+        {
+          "track_id": 1,
+          "name": "For Those About To Rock (We Salute You)",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 343719,
+          "bytes": 11170334,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 2,
+          "name": "Balls to the Wall",
+          "album_id": 2,
+          "media_type_id": 2,
+          "genre_id": 1,
+          "composer": "",
+          "milliseconds": 342562,
+          "bytes": 5510424,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 3,
+          "name": "Fast As a Shark",
+          "album_id": 3,
+          "media_type_id": 2,
+          "genre_id": 1,
+          "composer": "F. Baltes, S. Kaufman, U. Dirkscneider & W. Hoffman",
+          "milliseconds": 230619,
+          "bytes": 3990994,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 4,
+          "name": "Restless and Wild",
+          "album_id": 3,
+          "media_type_id": 2,
+          "genre_id": 1,
+          "composer": "F. Baltes, R.A. Smith-Diesel, S. Kaufman, U. Dirkscneider & W. Hoffman",
+          "milliseconds": 252051,
+          "bytes": 4331779,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 5,
+          "name": "Princess of the Dawn",
+          "album_id": 3,
+          "media_type_id": 2,
+          "genre_id": 1,
+          "composer": "Deaffy & R.A. Smith-Diesel",
+          "milliseconds": 375418,
+          "bytes": 6290521,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 6,
+          "name": "Put The Finger On You",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 205662,
+          "bytes": 6713451,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 7,
+          "name": "Let's Get It Up",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 233926,
+          "bytes": 7636561,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 8,
+          "name": "Inject The Venom",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 210834,
+          "bytes": 6852860,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 9,
+          "name": "Snowballed",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 203102,
+          "bytes": 6599424,
+          "unit_price": 0.99
+        },
+        {
+          "track_id": 10,
+          "name": "Evil Walks",
+          "album_id": 1,
+          "media_type_id": 1,
+          "genre_id": 1,
+          "composer": "Angus Young, Malcolm Young, Brian Johnson",
+          "milliseconds": 263497,
+          "bytes": 8611245,
+          "unit_price": 0.99
+        }
+      ],
+      "total": 3503
+    }
+  }
+]
+
+
+curl -s "http://localhost:5000/api/associations?model=albums&id=1&action=hasmany&limit=2&offset=50" | jq
+{
+  "message": "Invalid target"
+}
+
+curl -s "http://localhost:5000/api/associations?model=albums&id=1&action=hasmany&target=tracks&limit=5&offset=5" | jq
+{
+  "rows": [
+    {
+      "track_id": 6,
+      "name": "Put The Finger On You",
+      "album_id": 1,
+      "media_type_id": 1,
+      "genre_id": 1,
+      "composer": "Angus Young, Malcolm Young, Brian Johnson",
+      "milliseconds": 205662,
+      "bytes": 6713451,
+      "unit_price": 0.99
+    },
+    {
+      "track_id": 7,
+      "name": "Let's Get It Up",
+      "album_id": 1,
+      "media_type_id": 1,
+      "genre_id": 1,
+      "composer": "Angus Young, Malcolm Young, Brian Johnson",
+      "milliseconds": 233926,
+      "bytes": 7636561,
+      "unit_price": 0.99
+    },
+    {
+      "track_id": 8,
+      "name": "Inject The Venom",
+      "album_id": 1,
+      "media_type_id": 1,
+      "genre_id": 1,
+      "composer": "Angus Young, Malcolm Young, Brian Johnson",
+      "milliseconds": 210834,
+      "bytes": 6852860,
+      "unit_price": 0.99
+    },
+    {
+      "track_id": 9,
+      "name": "Snowballed",
+      "album_id": 1,
+      "media_type_id": 1,
+      "genre_id": 1,
+      "composer": "Angus Young, Malcolm Young, Brian Johnson",
+      "milliseconds": 203102,
+      "bytes": 6599424,
+      "unit_price": 0.99
+    },
+    {
+      "track_id": 10,
+      "name": "Evil Walks",
+      "album_id": 1,
+      "media_type_id": 1,
+      "genre_id": 1,
+      "composer": "Angus Young, Malcolm Young, Brian Johnson",
+      "milliseconds": 263497,
+      "bytes": 8611245,
+      "unit_price": 0.99
+    }
+  ],
+  "total": 3503
 }

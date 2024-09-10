@@ -1,9 +1,9 @@
 const path = require('path');
 const config = require('../../config');
-console.log('config', config);
+// console.log('config', config);
 const sqlite3 = require('sqlite3').verbose();
 const DB_PATH = path.join(__dirname, '../..', config.DB_PATH, config.DB_NAME);
-console.log('DB_PATH', DB_PATH);
+// console.log('DB_PATH', DB_PATH);
 
 const util = require('util');
 

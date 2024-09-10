@@ -9,7 +9,7 @@ const createAlbums = () => {
     artist_id INTEGER,
     FOREIGN KEY (artist_id) REFERENCES artists (artist_id)
   )`;
-  console.log(`[createAlbums] ${sql}`);
+  console.log(`[createAlbums] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -19,7 +19,7 @@ const createArtists = () => {
     artist_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT
   )`;
-  console.log(`[createArtists] ${sql}`);
+  console.log(`[createArtists] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -41,7 +41,7 @@ const createCustomers = () => {
     support_rep_id INTEGER,
     FOREIGN KEY (support_rep_id) REFERENCES employees (employee_id)
   )`;
-  console.log(`[createCustomers] ${sql}`);
+  console.log(`[createCustomers] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -64,7 +64,7 @@ const createEmployees = () => {
     fax TEXT,
     email TEXT
   )`;
-  console.log(`[createEmployees] ${sql}`);
+  console.log(`[createEmployees] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -74,7 +74,7 @@ const createGenres = () => {
     genre_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT
   )`;
-  console.log(`[createGenres] ${sql}`);
+  console.log(`[createGenres] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -89,7 +89,7 @@ const createInvoiceLines = () => {
     FOREIGN KEY (invoice_id) REFERENCES invoices (invoice_id),
     FOREIGN KEY (track_id) REFERENCES tracks (track_id)
   )`;
-  console.log(`[createInvoiceLines] ${sql}`);
+  console.log(`[createInvoiceLines] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -107,7 +107,7 @@ const createInvoices = () => {
     total REAL,
     FOREIGN KEY (customer_id) REFERENCES customers (customer_id)
   )`;
-  console.log(`[createInvoices] ${sql}`);
+  console.log(`[createInvoices] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -117,7 +117,7 @@ const createMediaTypes = () => {
     media_type_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT
   )`;
-  console.log(`[createMediaTypes] ${sql}`);
+  console.log(`[createMediaTypes] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -127,7 +127,7 @@ const createPlaylists = () => {
     playlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT
   )`;
-  console.log(`[createPlaylists] ${sql}`);
+  console.log(`[createPlaylists] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -140,7 +140,7 @@ const createPlaylistsTracks = () => {
     FOREIGN KEY (playlist_id) REFERENCES playlists (playlist_id),
     FOREIGN KEY (track_id) REFERENCES tracks (track_id)
   )`;
-  console.log(`[createPlaylistsTracks] ${sql}`);
+  console.log(`[createPlaylistsTracks] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
@@ -160,40 +160,40 @@ const createTracks = () => {
     FOREIGN KEY (media_type_id) REFERENCES media_types (media_type_id),
     FOREIGN KEY (genre_id) REFERENCES genres (genre_id)
   )`;
-  console.log(`[createTracks] ${sql}`);
+  console.log(`[createTracks] ${sql}`); // skipcq: JS-0002
   return db.asyncExec(sql);
 };
 
 // Create Foreign Keys
 const createForeignKeys = async () => {
-  let sql = `CREATE INDEX [IFK_AlbumArtistId] ON [albums] ([artist_id]);`;
+  let sql = 'CREATE INDEX [IFK_AlbumArtistId] ON [albums] ([artist_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_CustomerSupportRepId] ON [customers] ([support_rep_id]);`;
+  sql = 'CREATE INDEX [IFK_CustomerSupportRepId] ON [customers] ([support_rep_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_EmployeeReportsTo] ON [employees] ([reports_to]);`;
+  sql = 'CREATE INDEX [IFK_EmployeeReportsTo] ON [employees] ([reports_to]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_InvoiceCustomerId] ON [invoices] ([customer_id]);`;
+  sql = 'CREATE INDEX [IFK_InvoiceCustomerId] ON [invoices] ([customer_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_InvoiceLineInvoiceId] ON [invoice_lines] ([invoice_id]);`;
+  sql = 'CREATE INDEX [IFK_InvoiceLineInvoiceId] ON [invoice_lines] ([invoice_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_InvoiceLineTrackId] ON [invoice_lines] ([track_id]);`;
+  sql = 'CREATE INDEX [IFK_InvoiceLineTrackId] ON [invoice_lines] ([track_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_PlaylistTrackTrackId] ON [playlists_tracks] ([track_id]);`;
+  sql = 'CREATE INDEX [IFK_PlaylistTrackTrackId] ON [playlists_tracks] ([track_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_TrackAlbumId] ON [tracks] ([album_id]);`;
+  sql = 'CREATE INDEX [IFK_TrackAlbumId] ON [tracks] ([album_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_TrackGenreId] ON [tracks] ([genre_id]);`;
+  sql = 'CREATE INDEX [IFK_TrackGenreId] ON [tracks] ([genre_id]);';
   await db.asyncExec(sql);
 
-  sql = `CREATE INDEX [IFK_TrackMediaTypeId] ON [tracks] ([media_type_id]);`;
+  sql = 'CREATE INDEX [IFK_TrackMediaTypeId] ON [tracks] ([media_type_id]);';
   await db.asyncExec(sql);
 };
 

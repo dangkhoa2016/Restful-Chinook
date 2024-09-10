@@ -1,0 +1,119 @@
+{
+  "albums": {
+    "album_id": {
+      "type": "one-to-many",
+      "field": "album_id",
+      "field_target": "album_id"
+    }
+  },
+  "artists": [
+    {
+      "type": "one-to-many",
+      "field": "artist_id",
+      "target": "artist_id"
+    }
+  ],
+  "customers": {
+    "support_rep_id": {
+      "type": "many-to-one",
+      "field": "support_rep_id",
+      "field_target": "employee_id"
+    },
+    "customer_id": {
+      "type": "one-to-many",
+      "field": "customer_id",
+      "field_target": "customer_id"
+    }
+  },
+  "employees": {
+    "employee_id": {
+      "type": "one-to-many",
+      "field": "employee_id",
+      "field_target": "support_rep_id"
+    },
+    "reports_to": {
+      "type": "many-to-one",
+      "field": "reports_to",
+      "field_target": "employee_id"
+    }
+  },
+  "genres": [
+    {
+      "type": "one-to-many",
+      "field": "genre_id",
+      "target": "genre_id"
+    }
+  ],
+  "invoices": {
+    "customer_id": {
+      "type": "many-to-one",
+      "field": "customer_id",
+      "field_target": "customer_id"
+    },
+    "invoice_id": {
+      "type": "one-to-many",
+      "field": "invoice_id",
+      "field_target": "invoice_id"
+    }
+  },
+  "invoice_lines": {
+    "invoice_id": {
+      "type": "many-to-one",
+      "field": "invoice_id",
+      "field_target": "invoice_id"
+    },
+    "track_id": {
+      "type": "many-to-one",
+      "field": "track_id",
+      "field_target": "track_id"
+    }
+  },
+  "media_types": [
+    {
+      "type": "one-to-many",
+      "field": "media_type_id",
+      "target": "media_type_id"
+    }
+  ],
+  "playlists": [
+    {
+      "type": "one-to-many",
+      "field": "playlist_id",
+      "target": "playlist_id"
+    }
+  ],
+  "playlists_tracks": {
+    "playlist_id": {
+      "type": "many-to-one",
+      "field": "playlist_id",
+      "field_target": "playlist_id"
+    },
+    "track_id": {
+      "type": "many-to-one",
+      "field": "track_id",
+      "field_target": "track_id"
+    }
+  },
+  "tracks": {
+    "album_id": {
+      "type": "many-to-one",
+      "field": "album_id",
+      "field_target": "album_id"
+    },
+    "genre_id": {
+      "type": "many-to-one",
+      "field": "genre_id",
+      "field_target": "genre_id"
+    },
+    "media_type_id": {
+      "type": "many-to-one",
+      "field": "media_type_id",
+      "field_target": "media_type_id"
+    },
+    "track_id": {
+      "type": "one-to-many",
+      "field": "track_id",
+      "field_target": "track_id"
+    }
+  }
+}

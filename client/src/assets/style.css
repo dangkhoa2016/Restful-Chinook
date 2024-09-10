@@ -1,0 +1,130 @@
+body {
+  background-color: #e2e2e1;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.bg-gray {
+  background-color: #898f94;
+  color: #fff;
+}
+.rounded-table {
+  border-radius: 10px; /* Adjust the border-radius as needed */
+  overflow: hidden;
+}
+
+
+.users-loader-container .line {
+  position: relative;
+  background-color: #c9111180;
+  display: inline-block;
+  height: 0px;
+  border-radius: 5px;
+  width: 10px;
+  margin: 10px;
+  animation: line linear infinite 0.9s;
+}
+
+@keyframes line {
+  0% {
+    height: 0px;
+    margin-top: 110px;
+  }
+  50% {
+    height: 100px;
+    margin-top: 10px;
+  }
+  100% {
+    height: 0px;
+    margin-top: 110px;
+  }
+}
+
+.users-loader-container .d1 {
+  animation-delay: 0.15s;
+}
+.users-loader-container .d2 {
+  animation-delay: 0.3s;
+}
+.users-loader-container .d3 {
+  animation-delay: 0.45s;
+}
+.users-loader-container .d4 {
+  animation-delay: 0.6s;
+}
+.users-loader-container .d5 {
+  animation-delay: 0.75s;
+}
+.users-loader-container .d6 {
+  animation-delay: 0.9s;
+}
+
+.users-loader-container .caption {
+  text-align: center;
+  color: #c9111180;
+  font-family: "Noto Sans", sans-serif;
+}
+
+.users-loader-container .dot {
+  display: inline-block;
+  margin: 0px;
+  padding: 0px;
+  animation: dot 1s infinite linear;
+}
+
+.users-loader-container .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.users-loader-container .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+
+.feature-icon {
+  width: 3rem;
+  height: 3rem;
+}
+.svg-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.bsb-table-lg>:not(caption)>*>* {
+  padding: .75rem
+}
+
+.bsb-table-xl>:not(caption)>*>* {
+  padding: 1rem
+}
+
+
+.just-fade-enter-active,
+.just-fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.just-fade-enter-from,
+.just-fade-leave-to {
+  opacity: 0;
+}
+
+.top-30-percent { top: 30% }
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.text-purple {
+  color: var(--bs-purple);
+}
+.text-orange {
+  color: var(--bs-orange);
+}
+.text-teal {
+  color: var(--bs-teal);
+}
+.text-pink {
+  color: var(--bs-pink);
+}

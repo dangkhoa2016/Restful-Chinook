@@ -75,7 +75,7 @@ PRAGMA table_info(invoices);
 
 -- list all identities indexes
 SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name IN
- ('albums', 'artists', 'customers', 'employees', 'genres', 'invoices', 
+ ('albums', 'artists', 'customers', 'employees', 'genres', 'invoices',
  'invoice_lines', 'media_types', 'playlists', 'playlists_tracks', 'tracks');
 /*
 +-------------------------------------+----------------------------------------------------------------------------+
@@ -97,7 +97,7 @@ SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name IN
 
 -- list all identities indexes id
 SELECT * from sqlite_sequence WHERE name IN
- ('albums', 'artists', 'customers', 'employees', 'genres', 'invoices', 
+ ('albums', 'artists', 'customers', 'employees', 'genres', 'invoices',
  'invoice_lines', 'media_types', 'playlists', 'playlists_tracks', 'tracks');
 /*
 +---------------+------+
@@ -247,3 +247,14 @@ SELECT * FROM playlists_tracks LIMIT 5;
 
 -- show the first 5 rows from the tracks table
 SELECT * FROM tracks LIMIT 5;
+
+
+-- group track by album
+SELECT album_id, COUNT(*) AS track_count FROM tracks GROUP BY album_id;
+
+-- find track belong to multiple albums
+SELECT track_id, COUNT(*) AS album_count FROM tracks GROUP BY album_id HAVING album_count > 1;
+
+select * from tracks where album_id = 1;
+
+update customers set support_rep_id = 6 where customer_id = 55;

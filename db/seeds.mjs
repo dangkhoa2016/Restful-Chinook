@@ -1,9 +1,8 @@
 import fs from 'fs';
-import path from 'path';
 import Papa from 'papaparse';
 import { tableize, underscore } from 'inflection';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { path, dirname } from 'path';
 
 import dbHelpers from '../api/libs/db-helpers.js';
 
@@ -11,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const folder = path.join(__dirname, 'csv');
-console.log(`Importing CSV files from ${folder}`);
+console.log(`Importing CSV files from ${folder}`); // skipcq: JS-0002
 
 const processRow = async (modelName, row) => {
   const field_hash = Object.fromEntries(
@@ -30,13 +29,13 @@ const processRow = async (modelName, row) => {
   try {
     const result = await dbHelpers.create(modelName, field_hash);
     if (result.status !== 201) {
-      console.log(`Error importing ${modelName}:`, result);
+      console.log(`Error importing ${modelName}:`, result); // skipcq: JS-0002
       return false;
     }
 
     return true;
   } catch (err) {
-    console.log(`Error importing ${modelName}:`, err);
+    console.log(`Error importing ${modelName}:`, err); // skipcq: JS-0002
 
     return false;
   }
@@ -61,16 +60,16 @@ const importFile = (file) => {
           // console.log('Imported: ', result.data);
           total++;
         } else {
-          console.log('Error importing', result.data);
+          console.log('Error importing', result.data); // skipcq: JS-0002
           process.exit(1);
         }
       },
       complete: () => {
-        console.log(`Imported ${modelName} done: ${total} rows.`);
+        console.log(`Imported ${modelName} done: ${total} rows.`); // skipcq: JS-0002
         resolve();
       },
       error: err => {
-        console.error(`Error parsing CSV ${modelName}:`, err);
+        console.error(`Error parsing CSV ${modelName}:`, err); // skipcq: JS-0002
         resolve();
       }
     });
@@ -83,7 +82,7 @@ const importFile = (file) => {
   try {
     files = await fs.readdirSync(folder);
   } catch (err) {
-    console.error(err);
+    console.error(err); // skipcq: JS-0002
     return;
   }
 
