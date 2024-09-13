@@ -21,7 +21,7 @@
 	</template>
 	<div v-else class='card text-center pt-4 top-30-percent'>
 		<h3 class='text-center'>Select a model to view records</h3>
-		<img src='/client/src/assets/images/select-model.gif'
+		<img src='/src/assets/images/select-model.gif'
 			width='100' class='mx-auto' />
 	</div>
 </template>
@@ -35,15 +35,16 @@
 <script setup>
 	import { ref, onMounted, onBeforeMount, inject, watch } from 'vue';
 	import axios from 'axios';
-	import { useTableStore, fetchRecords, setRecords, setLoadRecordsError } from '/client/src/stores/tableStore.mjs';
-	import { renderValue } from '/client/src/libs/tableHelpers.mjs';
+	import { useTableStore, fetchRecords, setRecords, setLoadRecordsError } from '/src/stores/tableStore.mjs';
+	import { renderValue } from '/src/libs/tableHelpers.mjs';
 
-	import RecordLoader from '/client/src/components/RecordLoader.vue';
-	import RecordsTable from '/client/src/components/RecordsTable.vue';
-	import Pagination from '/client/src/components/Pagination.vue';
-	import ErrorLoadRecords from '/client/src/components/ErrorLoadRecords.vue';
+	import RecordLoader from '/src/components/RecordLoader.vue';
+	import RecordsTable from '/src/components/RecordsTable.vue';
+	import Pagination from '/src/components/Pagination.vue';
+	import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
 
 
+	const emits = defineEmits(['record-click']);
 	const emitter = inject('emitter');
   // const authStore = inject('authStore');
   // const { useAuthStore, logout, } = authStore;
@@ -95,6 +96,7 @@
   });
 
   watch(pageIndex, () => {
+		emitter.emit('model-page-change', pageIndex.value);
     scrollToTop();
     setTimeout(handlePageChange, 500);
   });
@@ -124,7 +126,7 @@
 	});
 
 	const handleRowClick = ({ record, index }) => {
-		emitter.emit('record-click', { record, index });
+		emits('record-click', { record, index });
 	};
 
 </script>

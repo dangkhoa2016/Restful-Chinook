@@ -3,32 +3,39 @@
     <h1 class="text-center mb-4">Resful Chinook</h1>
 
     <div class="row">
-      <!-- two columns 4/8 -->
       <div class="col-md-4">
         <ListOfModels />
       </div>
       <div class="col-md-8 mt-4 mt-sm-0">
-        <RecordsPanel />
+        <RecordsPanel @record-click='handleRecordClick' />
       </div>
     </div>
   </div>
 
-  <RecordDetail />
+  <RecordDetail ref='detailTab' :data-record='currentRecord' />
+  <ModalDetail />
 </template>
 
 <script>
-
-  import ListOfModels from '/client/src/components/ListOfModels.vue';
-  import RecordsPanel from '/client/src/components/RecordsPanel.vue';
-  import RecordDetail from '/client/src/components/RecordDetail.vue';
-
   export default {
     name: 'App',
-    components: {
-      ListOfModels,
-      RecordsPanel,
-      RecordDetail,
-    },
-  };
+  }
+</script>
 
+<script setup>
+  import { ref } from 'vue';
+  import ListOfModels from '/src/components/ListOfModels.vue';
+  import RecordsPanel from '/src/components/RecordsPanel.vue';
+  import RecordDetail from '/src/components/RecordDetail.vue';
+  import ModalDetail from '/src/components/ModalDetail.vue';
+
+  const currentRecord = ref(null);
+  const detailTab = ref(null);
+
+  const handleRecordClick = (detail) => {
+    currentRecord.value = detail && detail.record;
+    setTimeout(() => {
+      window.scrollTo(0, detailTab.value.$el.offsetTop);
+    }, 100);
+  }
 </script>

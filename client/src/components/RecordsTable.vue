@@ -44,8 +44,8 @@
 <script setup>
   import { ref, defineProps, computed } from 'vue';
   import changeCase from 'change-case';
-  import RecordLoader from '/client/src/components/RecordLoader.vue';
-  import ErrorLoadRecords from '/client/src/components/ErrorLoadRecords.vue';
+  import RecordLoader from '/src/components/RecordLoader.vue';
+  import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
 
   const props = defineProps({
     data: {

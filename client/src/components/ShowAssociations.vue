@@ -9,24 +9,24 @@
     <nav class='nav nav-tabs justify-content-center mt-4'>
       <li class='nav-item' role='presentation'>
         <button class='nav-link' :class="{'active': showTab == 1}"
-          data-bs-toggle='tab' ref='belongToTabBtn'
-          data-bs-target='#belongto-tab' type='button' role='tab'
-          aria-controls='belongto-tab' aria-selected='true'>Belong to</button>
+          data-bs-toggle='tab' type='button' role='tab' aria-selected='true'
+          :data-bs-target='`#${belongToTabId}`'
+          :aria-controls='belongToTabId'>Belong to</button>
       </li>
       <li class='nav-item' role='presentation'>
         <button class='nav-link' :class="{'active': showTab == 2}"
-          data-bs-toggle='tab' ref='hasManyTabBtn'
-          data-bs-target='#hasmany-tab' type='button' role='tab'
-          aria-controls='hasmany-tab' aria-selected='false'>Has many</button>
+          data-bs-toggle='tab' type='button' role='tab' aria-selected='false'
+          :data-bs-target='`#${hasManyTabId}`'
+          :aria-controls='hasManyTabId'>Has many</button>
       </li>
     </nav>
     <div class='tab-content bg-white rounded'>
       <div class='tab-pane fade p-4' :class="{'show active': showTab == 1}"
-        id='belongto-tab' role='tabpanel' aria-labelledby='belongto-tab'>
+        :id='belongToTabId' role='tabpanel' :aria-labelledby='belongToTabId'>
         <BelongToTab :model-id='modelId' :load-data='showTab == 1' />
       </div>
       <div class='tab-pane fade p-4' :class="{'show active': showTab == 2}"
-        id='hasmany-tab' role='tabpanel' aria-labelledby='hasmany-tab'>
+        :id='hasManyTabId' role='tabpanel' :aria-labelledby='hasManyTabId'>
         <HasManyTab :model-id='modelId' :load-data='showTab == 2' />
       </div>
     </div>
@@ -43,15 +43,13 @@
   import { ref, watch, inject, onMounted, onBeforeUnmount } from 'vue';
   import * as bootstrap from 'bootstrap';
 
-  import BelongToTab from '/client/src/components/BelongToTab.vue';
-  import HasManyTab from '/client/src/components/HasManyTab.vue';
+  import BelongToTab from '/src/components/BelongToTab.vue';
+  import HasManyTab from '/src/components/HasManyTab.vue';
 
 
 	const emitter = inject('emitter');
   const collapseAssociationsTab = ref(null);
   const collapseAssociationsJs = ref(null);
-  const hasManyTabBtn = ref(null);
-  const belongToTabBtn = ref(null);
   const currentModel = ref(null);
 
   const props = defineProps({
@@ -61,9 +59,15 @@
     },
   });
   const showTab = ref(null);
+  const belongToTabId = ref(null);
+  const hasManyTabId = ref(null);
+  const isInsideModal = ref(false);
 
 
   onMounted(() => {
+    belongToTabId.value = 'belongto-tab-' + (new Date()).getTime() + Math.floor(Math.random() * 1000);
+    hasManyTabId.value = 'hasmany-tab-' + (new Date()).getTime() + Math.floor(Math.random() * 1000);
+
     if (!collapseAssociationsTab.value)
       return;
 
@@ -80,20 +84,33 @@
       currentModel.value = model;
 		});
 
-    hasManyTabBtn.value.addEventListener('shown.bs.tab', handleTabChange);
-    belongToTabBtn.value.addEventListener('shown.bs.tab', handleTabChange);
+    emitter.on('model-page-change', () => {
+      collapseAssociationsJs.value.hide();
+      showTab.value = null;
+    });
+
+    emitter.on('modal-hidden', () => {
+      if (isInsideModal.value)
+        collapseAssociationsJs.value.hide();
+    });
+
+    collapseAssociationsTab.value.querySelectorAll('nav .nav-item').forEach((el) => {
+      el.addEventListener('shown.bs.tab', handleTabChange);
+    });
+
+    isInsideModal.value = !!collapseAssociationsTab.value.closest('.modal-body');
   });
 
   const handleTabChange = (event) => {
     const tab = event.target.getAttribute('aria-controls');
-    showTab.value = tab === 'belongto-tab' ? 1 : 2;
+    showTab.value = tab === belongToTabId.value ? 1 : 2;
   };
 
   const handleCollapseHide = (event) => {
     showTab.value = null;
   };
 
-  const toggleAssociations = () => {
+  const toggleAssociations = (ev) => {
     collapseAssociationsJs.value.toggle();
   };
 
@@ -112,8 +129,10 @@
   onBeforeUnmount(() => {
     collapseAssociationsTab.value.removeEventListener('shown.bs.collapse', handleCollapseShown);
     collapseAssociationsTab.value.removeEventListener('hide.bs.collapse', handleCollapseHide);
-    hasManyTabBtn.value.removeEventListener('shown.bs.tab', handleTabChange);
-    belongToTabBtn.value.removeEventListener('shown.bs.tab', handleTabChange);
+
+    collapseAssociationsTab.value.querySelectorAll('nav .nav-item').forEach((el) => {
+      el.removeEventListener('shown.bs.tab', handleTabChange);
+    });
   });
 
   watch(() => props.modelId, (newValue, oldValue) => {

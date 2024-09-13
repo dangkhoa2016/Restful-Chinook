@@ -1,18 +1,18 @@
 <template>
   <transition name='just-fade' mode='out-in'>
-    <LoadingBelongTo v-if='loadingBelongTos' />
-    <div v-else-if='loadBelongTosError'>
-      <ErrorLoadRecords :message='loadBelongTosError'
+    <LoadingBelongTo v-if='loadingBelongTosRef || forceLoading' />
+    <div v-else-if='loadBelongTosErrorRef'>
+      <ErrorLoadRecords :message='loadBelongTosErrorRef'
         :show-reload-button='true' @reload='handleIdChange' />
     </div>
-    <div v-else-if='!belongTos || belongTos.length == 0'>
+    <div v-else-if='!belongTosRef || belongTosRef.length == 0' :id='`nodata-${mainId}`'>
       <div class='alert alert-info m-0' role='alert'>
         No associations found
       </div>
     </div>
-    <div v-else>
+    <div v-else :id='`main-${mainId}`'>
       <nav class='nav nav-tabs justify-content-center' key='nav'>
-        <li v-for='(item, index) in belongTos' :key='index'
+        <li v-for='(item, index) in belongTosRef' :key='index'
           class='nav-item' role='presentation'>
           <button :class="[{ 'nav-link': true, 'active': index == 0 }]"
             data-bs-toggle='tab'
@@ -23,10 +23,10 @@
         </li>
       </nav>
       <div class='tab-content mt-4' key='tabs'>
-        <div v-for='(item, index) in belongTos' :key='index'
+        <div v-for='(item, index) in belongTosRef' :key='index'
           class='tab-pane fade' :class='{ show: index == 0, active: index == 0 }'
           :id='`${item.name}-tab`' role='tabpanel' :aria-labelledby='`${item.name}-tab`'>
-          <DisplayJson v-if='item.record' :record='item.record' :current-model='item.name' />
+          <DisplayJson v-if='item.record' :record='item.record' :current-model='item.name' :show-modal='true' />
           <div v-else class='alert alert-info m-0' role='alert'>
             No record found
           </div>
@@ -43,7 +43,8 @@
 </script>
 
 <script setup>
-  import { ref, inject, watch, onMounted, onBeforeMount, nextTick, onBeforeUnmount } from 'vue';
+  import { ref, inject, watch, onMounted, computed,
+    onBeforeMount, nextTick, onBeforeUnmount } from 'vue';
 	import axios from 'axios';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
@@ -53,15 +54,15 @@
     fetchBelongTos,
     setBelongTos,
     setLoadBelongTosError,
-  } from '/client/src/stores/associationStore.mjs';
+  } from '/src/stores/associationStore.mjs';
 
-  import LoadingBelongTo from '/client/src/components/LoadingBelongTo.vue';
-  import ErrorLoadRecords from '/client/src/components/ErrorLoadRecords.vue';
-  import DisplayJson from '/client/src/components/DisplayJson.vue';
-
+  import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
+  import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
+  import DisplayJson from '/src/components/DisplayJson.vue';
 
 	const emitter = inject('emitter');
   const currentModel = ref(null);
+  
   const props = defineProps({
     modelId: {
       type: [String, Number, null, undefined],
@@ -75,7 +76,37 @@
   const {
     belongTos, loadingBelongTos, loadBelongTosError
   } = useAssociationStore();
+  const belongTosRef = ref([]);
+  const loadingBelongTosRef = ref(null);
+  const loadBelongTosErrorRef = ref(null);
 	const cancelToken = ref(null);
+  const forceLoading = ref(true);
+  const isFetching = ref(false);
+
+  const mainId = computed(() => {
+    return currentModel.value ? `${currentModel.value}-${props.modelId}-${Math.floor(Math.random() * 1000)}` : '';
+  });
+
+  const getModal = () => {
+    const id = mainId.value;
+    const el = document.querySelector(`#main-${id}`) || document.querySelector(`#nodata-${id}`);
+    return el ? el.closest('.modal') : null;
+  };
+
+  watch(() => belongTos.value, (newVal) => {
+    if (isFetching.value)
+      belongTosRef.value = newVal;
+  });
+
+  watch(() => loadingBelongTos.value, (newVal) => {
+    if (isFetching.value)
+      loadingBelongTosRef.value = newVal;
+  });
+
+  watch(() => loadBelongTosError.value, (newVal) => {
+    if (isFetching.value)
+      loadBelongTosErrorRef.value = newVal;
+  });
 
   const getModelName = (model) => {
     return changeCase.capitalCase(pluralize.singular(model));
@@ -83,54 +114,73 @@
 
   const handleIdChange = () => {
 		if (!currentModel.value) return;
-		if (cancelToken.value) {
+		if (cancelToken.value)
 			cancelToken.value.cancel('aborting previous request');
-		}
 
+    forceLoading.value = false;
 		cancelToken.value = axios.CancelToken.source();
+    isFetching.value = true;
 
     fetchBelongTos('', currentModel.value, props.modelId, cancelToken.value.token).then(() => {
 			cancelToken.value = null;
-      setTimeout(() => { scrollToBottom(); }, 500);
+      setTimeout(() => {
+        scrollToBottom();
+      }, 500);
+      isFetching.value = false;
 		});
   };
 
   const scrollToBottom = () => {
-    window.scroll({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
+    setTimeout(() => {
+      const modal = getModal();
+      if (modal) {
+        modal.scroll({
+          top: modal.scrollHeight,
+          behavior: 'smooth'
+        });
+      } else {
+        window.scroll({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 20);
   }
 
   onMounted(() => {
 		emitter.on('load-table', (model) => {
       currentModel.value = model;
 		});
+
+    emitter.on('show-modal', ({ record, model }) => {
+      currentModel.value = model;
+    });
   });
 
   onBeforeUnmount(() => {
-    if (cancelToken.value) {
+    if (cancelToken.value)
       cancelToken.value.cancel('[BelongToTab] onBeforeUnmount aborting previous request');
-    }
-  });
-
-  watch(() => loadBelongTosError, (newVal) => {
-    console.log('loadBelongTosError', newVal);
   });
 
   watch(() => props.modelId, (newVal) => {
-    setBelongTos(null);
-    setLoadBelongTosError(null);
+    belongTosRef.value = [];
+    loadBelongTosErrorRef.value = null;
+    loadingBelongTosRef.value = false;
   });
 
   watch(() => props.loadData, (newVal) => {
     if (newVal) {
-      if (!belongTos.value || belongTos.value.length == 0) {
+      if (!belongTosRef.value || belongTosRef.value.length == 0) {
         handleIdChange();
         setTimeout(() => { scrollToBottom(); }, 650);
+        return;
       }
-      else
-        setTimeout(() => { scrollToBottom(); }, 10);
+
+      setTimeout(() => { scrollToBottom(); }, 10);
+      return;
     }
+    
+    if (!belongTosRef.value || belongTosRef.value.length == 0)
+      forceLoading.value = true;
   });
 </script>

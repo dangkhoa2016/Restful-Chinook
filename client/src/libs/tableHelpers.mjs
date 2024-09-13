@@ -60,8 +60,8 @@ const renderValue = (model, key, value, index) => {
         default:
           return value;
       }
-    case 'playlist_track':
-    case 'playlist-track':
+    case 'playlists-tracks':
+    case 'playlists_tracks':
       switch (key) {
         case 'playlist_id':
           return value;

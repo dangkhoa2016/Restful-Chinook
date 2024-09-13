@@ -3,15 +3,32 @@ const associationsMapping = require('../../libs/associations-mapping');
 const tablesMapping = require('../../libs/tables-mapping');
 
 const specialCases = {
-  'tracks': {
-    'type': 'many-to-one',
-    'field': 'artist_id',
-    'table': 'artists',
+  'tracks': [
+    {
+      'table': 'playlists',
+      'query': 'SELECT * FROM playlists WHERE playlist_id in (SELECT playlist_id FROM playlists_tracks WHERE track_id = ?)',
+      'field_target': 'track_id',
+    }
+  ],
+  'playlists': [
+    {
+      'table': 'tracks',
+      'query': 'SELECT * FROM tracks WHERE track_id in (SELECT track_id FROM playlists_tracks WHERE playlist_id = ?)',
+      'field_target': 'playlist_id',
+    }
+  ],
+  'invoices': [
+    {
+      'table': 'tracks',
+      'query': 'SELECT * FROM tracks WHERE track_id in (SELECT track_id FROM invoice_lines WHERE invoice_id = ?)',
+      'field_target': 'invoice_id',
+    }
+  ],
+  'artists': [{
+    'table': 'tracks',
+    'query': 'SELECT * FROM tracks WHERE album_id in (SELECT album_id FROM albums WHERE artist_id = ?)',
     'field_target': 'artist_id',
-  },
-  'invoices': {
-    // has many invoice_lines -> tracks
-  },
+  }],
 };
 
 const handleBelongTo = async (model, record, res) => {
@@ -23,7 +40,7 @@ const handleBelongTo = async (model, record, res) => {
       let row = null;
       if (record[field]) {
         const { status, result } = await dbHelpers.getByQuery(key, { [field_target]: record[field] });
-        row = status === 200 ? result.rows : null;
+        row = status === 200 ? result.rows[0] : null;
       }
 
       list.push({
@@ -38,13 +55,29 @@ const handleBelongTo = async (model, record, res) => {
 
 
 const handleHasMany = async (model, record, query, res) => {
-  // console.log('query', query);
   if (query && Object.keys(query).length > 0) {
     const { target } = query || {};
     if (!target)
       return res.status(400).json({ message: 'Invalid target' });
 
-    const { status, result } = await dbHelpers.getAll(target, query);
+    delete query['target'];
+    const { limit, offset } = query;
+    delete query['limit'];
+    delete query['offset'];
+
+    if (specialCases[model]) {
+      var specialCase = specialCases[model].find(item => item.table === target);
+      if (specialCase) {
+        const { status, result } = await dbHelpers.getByRawQuery(specialCase.query, [record[specialCase.field_target]], { limit, offset });
+        res.status(status).json(result);
+        return;
+      }
+    }
+
+    filter_field = associationsMapping[model][target]['field_target'];
+    query[filter_field] = record[associationsMapping[model][target]['field']];
+
+    const { status, result } = await dbHelpers.getByQuery(target, query, { limit, offset });
     res.status(status).json(result);
     return;
   }
@@ -57,6 +90,15 @@ const handleHasMany = async (model, record, query, res) => {
 
       list.push({
         name: key,
+        record: [],
+      });
+    }
+  }
+
+  if (specialCases[model]) {
+    for (let item of specialCases[model]) {
+      list.push({
+        name: item.table,
         record: [],
       });
     }

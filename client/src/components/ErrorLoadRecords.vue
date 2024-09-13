@@ -39,7 +39,7 @@
 
   import { ref, onMounted } from 'vue';
 
-  const folder = '/client/src/assets/images';
+  const folder = '/src/assets/images';
 
   defineProps({
     message: {

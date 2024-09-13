@@ -6,7 +6,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const loadedModules = {};
 
 const getComponentPath = (componentName, isView = false) => {
-  return `/client/src/${isView ? 'views' : 'components'}/${componentName}.vue`;
+  return `/src/${isView ? 'views' : 'components'}/${componentName}.vue`;
 }
 
 const scrollToTop = () => {

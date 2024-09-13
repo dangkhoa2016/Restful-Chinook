@@ -34,66 +34,8 @@ mock.onPost('/graphql').reply(async config => {
   const requestData = JSON.parse(config.data);
   // console.log('Mock for /graphql is set up. Request config:', config, requestData);
 
-  for (const [query, file] of Object.entries(queryToFileMap)) {
-    if (requestData.query.includes(query)) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get(`/src/sample-data/${file}`);
-      return [200, data];
-    }
-   }
-
-  if (requestData.query.includes('updateLike') && requestData.query.includes('like: true)')) {
-    if (requestData.query.includes('photoId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/like-photo.json');
-      return [200, data];
-    } else if (requestData.query.includes('catId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/like-cat.json');
-      return [200, data];
-    }
-  } else if (requestData.query.includes('updateLike') && requestData.query.includes('like: false)')) {
-    if (requestData.query.includes('photoId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/unlike-photo.json');
-      return [200, data];
-    } else if (requestData.query.includes('catId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/unlike-cat.json');
-      return [200, data];
-    }
-  } else if (requestData.query.includes('toggleStatus') && requestData.query.includes('active: false)')) {
-    if (requestData.query.includes('photoId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/disable-photo.json');
-      return [200, data];
-    } else if (requestData.query.includes('catId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/disable-cat.json');
-      return [200, data];
-    } else if (requestData.query.includes('userId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/disable-user.json');
-      return [200, data];
-    }
-  } else if (requestData.query.includes('toggleStatus') && requestData.query.includes('active: true)')) {
-    if (requestData.query.includes('photoId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/enable-photo.json');
-      return [200, data];
-    } else if (requestData.query.includes('catId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/enable-cat.json');
-      return [200, data];
-    } else if (requestData.query.includes('userId')) {
-      const { data } = await mock.axiosInstanceWithoutInterceptors.get('/src/sample-data/enable-user.json');
-      return [200, data];
-    }
-  }
-
-  if (requestData.query.includes('userFields')) {
-    return [200, {
-      data: {
-        userFields: [
-          'name', 'email', 'phone', 'address', 'city', 'state', 'zip', 'country', 'role', 'status'
-        ]
-      }
-    }];
-  }
-
   // If the query doesn't match the second one, return an empty response or handle accordingly
   return [200, {}];
-
 });
 
 mock.onAny().passThrough();

@@ -1,34 +1,35 @@
 <template>
   <transition name='just-fade' mode='out-in'>
-    <LoadingBelongTo v-if='showLoading' />
-    <div v-else-if='loadHasManysError'>
-      <ErrorLoadRecords :message='loadHasManysError'
+    <LoadingBelongTo v-if='loadingHasManysRef || firstLoad' />
+    <div v-else-if='loadHasManysErrorRef'>
+      <ErrorLoadRecords :message='loadHasManysErrorRef'
         :show-reload-button='true' @reload='handleIdChange' />
     </div>
-    <div v-else-if='!hasManys || hasManys.length == 0'>
+    <div v-else-if='!hasManysRef || hasManysRef.length == 0'>
       <div class='alert alert-info m-0' role='alert'>
         No associations found
       </div>
     </div>
-    <div v-else>
-      <nav class='nav nav-tabs justify-content-center' key='nav'>
-        <li v-for='(item, index) in hasManys' :key='index'
+    <div v-else ref='mainEl'>
+      <nav class='nav nav-tabs justify-content-center' ref='hasManyNav'>
+        <li v-for='(item, index) in hasManysRef' :key='index'
           class='nav-item' role='presentation'>
           <button :class="[{ 'nav-link': true, 'active': index == 0 }]"
             data-bs-toggle='tab'
-            :data-bs-target='`#${item.name}-tab`'
+            :data-bs-target='`#${mainId}-${item.name}-tab`'
             type='button' role='tab'
-            :aria-controls='`${item.name}-tab`'
+            :aria-controls='`${mainId}-${item.name}-tab`'
             :aria-selected='index == 0'>{{ getModelName(item.name) }}</button>
         </li>
       </nav>
-      <div class='tab-content mt-4' key='tabs'>
-        <div v-for='(item, index) in hasManys' :key='index'
+      <div class='tab-content mt-4'>
+        <div v-for='(item, index) in hasManysRef' :key='index'
           class='tab-pane fade' :class='{ show: index == 0, active: index == 0 }'
-          :id='`${item.name}-tab`' role='tabpanel' :aria-labelledby='`${item.name}-tab`'>
+          :id='`${mainId}-${item.name}-tab`' role='tabpanel'
+          :aria-labelledby='`${mainId}-${item.name}-tab`'>
           <AssociationModelTable :model-id='modelId'
             :current-model='currentModel'
-            :load-on-mount='index === 0 && loadData' :target='item.name' />
+            :load-data='loadIndex === index && loadData' :target='item.name' />
         </div>
       </div>
     </div>
@@ -52,16 +53,19 @@
     fetchHasManys,
     setHasManys,
     setLoadHasManysError,
-  } from '/client/src/stores/associationStore.mjs';
+  } from '/src/stores/associationStore.mjs';
 
-  import LoadingBelongTo from '/client/src/components/LoadingBelongTo.vue';
-  import ErrorLoadRecords from '/client/src/components/ErrorLoadRecords.vue';
-  import AssociationModelTable from '/client/src/components/AssociationModelTable.vue';
+  import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
+  import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
+  import AssociationModelTable from '/src/components/AssociationModelTable.vue';
 
 
 	const emitter = inject('emitter');
   const currentModel = ref(null);
-  const modelIdChanged = ref(false);
+  const firstLoad = ref(true);
+  const hasManyNav = ref(null);
+  const mainEl = ref(null);
+  const loadIndex = ref(0);
   const props = defineProps({
     modelId: {
       type: [String, Number, null, undefined],
@@ -77,32 +81,39 @@
     loadingHasManys,
     loadHasManysError,
   } = useAssociationStore();
+  const hasManysRef = ref(null);
+  const loadingHasManysRef = ref(null);
+  const loadHasManysErrorRef = ref(null);
 	const cancelToken = ref(null);
-
-  const showLoading = computed(() => {
-    return loadingHasManys.value || modelIdChanged.value;
-  });
+  const isFetching = ref(false);
+  const isInsideModal = ref(false);
 
   const getModelName = (model) => {
     return changeCase.capitalCase(pluralize.singular(model));
   };
 
+  const mainId = computed(() => {
+    return currentModel.value ? `${currentModel.value}-${props.modelId}-${Math.floor(Math.random() * 1000)}` : '';
+  });
+
   const handleIdChange = () => {
 		if (!currentModel.value) return;
-		if (cancelToken.value) {
+		if (cancelToken.value)
 			cancelToken.value.cancel('[HasManyTab] aborting previous request');
-		}
 
+    firstLoad.value = false;
+    isFetching.value = true;
 		cancelToken.value = axios.CancelToken.source();
-
-    modelIdChanged.value = false;
-
     fetchHasManys('', currentModel.value, props.modelId, cancelToken.value.token).then(() => {
 			cancelToken.value = null;
+      isFetching.value = false;
 		});
   };
 
   const scrollToBottom = () => {
+    if (isInsideModal.value)
+      return;
+
     window.scroll({
       top: document.body.scrollHeight,
       behavior: 'smooth'
@@ -110,33 +121,84 @@
   }
 
   onBeforeUnmount(() => {
-    if (cancelToken.value) {
+    if (cancelToken.value)
       cancelToken.value.cancel('[HasManyTab] onBeforeUnmount aborting previous request');
+
+    if (hasManyNav.value) {
+      hasManyNav.value.querySelectorAll('.nav-item').forEach((el) => {
+        el.removeEventListener('shown.bs.tab', handleTabChange);
+      });
     }
   });
 
   onMounted(() => {
 		emitter.on('load-table', (model) => {
       currentModel.value = model;
+
+      setHasManys(null);
+      setLoadHasManysError(null);
+      loadIndex.value = 0;
 		});
+
+    emitter.on('show-modal', ({ record, model }) => {
+      currentModel.value = model;
+    });
   });
 
-  watch(() => loadHasManysError, (newVal) => {
-    console.log('loadHasManysError', newVal);
+  const handleTabChange = (event) => {
+    const tab = event.target.getAttribute('aria-controls');
+    let index = 0;
+    hasManysRef.value.forEach((item, i) => {
+      if (`${mainId.value}-${item.name}-tab` === tab)
+        index = i;
+    });
+
+    loadIndex.value = index;
+  };
+
+  watch(() => hasManys.value, (newVal) => {
+    if (isFetching.value)
+      hasManysRef.value = newVal;
   });
 
-  watch(() => props.modelId, (newVal) => {
-    modelIdChanged.value = true;
-    setHasManys(null);
-    setLoadHasManysError(null);
+  watch(() => loadingHasManys.value, (newVal) => {
+    if (isFetching.value)
+      loadingHasManysRef.value = newVal;
+  });
+
+  watch(() => loadHasManysError.value, (newVal) => {
+    if (isFetching.value)
+      loadHasManysErrorRef.value = newVal;
+  });
+
+  watch(() => hasManyNav.value, (newVal, oldVal) => {
+    if (!newVal) {
+      if (oldVal) {
+        oldVal.querySelectorAll('.nav-item').forEach((el) => {
+          el.removeEventListener('shown.bs.tab', handleTabChange);
+        });
+      }
+    };
+
+    newVal.querySelectorAll('.nav-item').forEach((el) => {
+      el.addEventListener('shown.bs.tab', handleTabChange);
+    });
+  });
+
+  watch(() => mainEl.value, (newVal) => {
+    if (newVal)
+      isInsideModal.value = !!newVal.closest('.modal');
+    else
+      isInsideModal.value = false;
   });
 
   watch(() => props.loadData, (newVal) => {
-    if (newVal) {
-      if (!hasManys.value || hasManys.value.length == 0)
-        handleIdChange();
-      else
-        setTimeout(() => { scrollToBottom(); }, 10);
-    }
+    if (!newVal)
+      return;
+
+    if (!hasManysRef.value || hasManysRef.value.length == 0)
+      handleIdChange();
+    else
+      setTimeout(() => { scrollToBottom(); }, 10);
   });
 </script>

@@ -26,11 +26,14 @@ app.use(morgan('combined', {
 // log to console
 app.use(morgan('dev'));
 
-app.use('/client', express.static(path.join(__dirname, 'client')));
+// Serve static files from the /client folder
+app.use(express.static(path.join(__dirname, 'client')));
 
+// API routes
 app.use('/api', api);
 
-app.use('/', (req, res) => {
+// Serve the index.html file for all other requests
+app.get('*', (req, res) => {
   const indexHtml = path.join(__dirname, 'client/index.html');
   res.sendFile(indexHtml);
 });

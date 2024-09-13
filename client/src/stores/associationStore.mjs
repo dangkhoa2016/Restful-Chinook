@@ -1,6 +1,6 @@
 
 import { reactive, toRefs } from 'vue';
-import api, { endpoint } from '/client/src/libs/api.mjs';
+import api, { endpoint } from '/src/libs/api.mjs';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Create a reactive store
@@ -34,7 +34,7 @@ const fetchBelongTos = async (token, model, id, abortToken) => {
   setBelongTos(null);
   associationStore.loadingBelongTos = true;
   associationStore.loadBelongTosError = null;
-  await sleep(2000);
+  await sleep(1500);
 
   if (abortToken && abortToken.reason) {
     // console.log('Aborted fetch belongTos', model);
@@ -138,7 +138,7 @@ const fetchHasManyTargets = async ({ token, model, id, target, limit, offset, ab
   setHasManyTargetRecords(null, 0);
   associationStore.loadingHasManyTargets = true;
   associationStore.loadHasManyTargetsError = null;
-  await sleep(2000);
+  await sleep(1500);
 
   if (abortToken && abortToken.reason) {
     // console.log('Aborted fetch hasManyTargets', model);

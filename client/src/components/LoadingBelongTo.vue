@@ -1,7 +1,7 @@
 <template>
   <div class='card text-center py-3'>
 		<h4 class='text-center'>Loading...</h4>
-		<img src='/client/src/assets/images/loading-belongto.gif'
+		<img src='/src/assets/images/loading-belongto.gif'
 			width='100' class='mx-auto' />
 	</div>
 </template>

@@ -39,7 +39,7 @@
     { id: 'customers', name: 'Customers' },
     { id: 'employees', name: 'Employees' },
     { id: 'genres', name: 'Genres' },
-    { id: 'invoice_lines', name: 'Invoice Lines' },
+    { id: 'invoice-lines', name: 'Invoice Lines' },
     { id: 'invoices', name: 'Invoices' },
     { id: 'media-types', name: 'Media Types' },
     { id: 'playlists', name: 'Playlists' },

@@ -1,23 +1,23 @@
 <template>
   <transition name='just-fade' mode='out-in'>
-    <LoadingBelongTo v-if='loadingHasManyTargets || !modelId' />
-    <div v-else-if='loadHasManyTargetsError'>
-      <ErrorLoadRecords :message='loadHasManyTargetsError'
+    <LoadingBelongTo v-if='(loadData && loadingRecords) || modelIdChanged' />
+    <div v-else-if='loadData && loadError'>
+      <ErrorLoadRecords :message='loadError'
         :show-reload-button='true' @reload='handleIdChange' />
     </div>
-    <div v-else-if='!targetTotalItems'>
+    <div v-else-if='loadData && !totalRecords'>
       <div class='alert alert-info m-0' role='alert'>
         No records found
       </div>
     </div>
-    <div v-else :id='uniqueId'>
-      <RecordsTable :data='hasManyTargetRecords'>
+    <div v-else-if='loadData' :id='uniqueId'>
+      <RecordsTable :data='tableData'>
 				<template #default='{ data: { key, value, index } }'>
 					{{ renderValue(target, key, value, index) }}
 				</template>
 			</RecordsTable>
-			<Pagination v-if='targetTotalItems' v-model='pageIndex'
-				:total-items='targetTotalItems'
+			<Pagination v-if='totalRecords' v-model='pageIndex'
+				:total-items='totalRecords'
 				:items-per-page='itemsPerPage' />
     </div>
   </transition>
@@ -34,19 +34,19 @@
   import axios from 'axios';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
-  import { renderValue } from '/client/src/libs/tableHelpers.mjs';
+  import { renderValue } from '/src/libs/tableHelpers.mjs';
   import {
     useAssociationStore,
 
     fetchHasManyTargets,
     setHasManyTargetRecords,
     setLoadHasManyTargetsError,
-  } from '/client/src/stores/associationStore.mjs';
+  } from '/src/stores/associationStore.mjs';
 
-  import LoadingBelongTo from '/client/src/components/LoadingBelongTo.vue';
-  import ErrorLoadRecords from '/client/src/components/ErrorLoadRecords.vue';
-  import RecordsTable from '/client/src/components/RecordsTable.vue';
-  import Pagination from '/client/src/components/Pagination.vue';
+  import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
+  import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
+  import RecordsTable from '/src/components/RecordsTable.vue';
+  import Pagination from '/src/components/Pagination.vue';
 
   const props = defineProps({
     modelId: {
@@ -57,13 +57,11 @@
       type: String,
       required: false,
     },
-    loadOnMount: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     currentModel: {
       type: String,
+    },
+    loadData: {
+      type: Boolean,
     },
   });
   const itemsPerPage = 10;
@@ -73,6 +71,11 @@
     targetTotalItems = 0, loadHasManyTargetsError
   } = useAssociationStore();
   const cancelToken = ref(null);
+  const modelIdChanged = ref(true);
+  const tableData = ref([]);
+  const totalRecords = ref(0);
+  const loadError = ref(null);
+  const loadingRecords = ref(false);
 
   const uniqueId = computed(() => {
     return `${props.currentModel}-${props.target}-${props.modelId}`;
@@ -85,6 +88,7 @@
     }
 
     cancelToken.value = axios.CancelToken.source();
+    modelIdChanged.value = false;
 
     const limit = itemsPerPage;
 		const offset = (pageIndex.value - 1) * itemsPerPage;
@@ -97,7 +101,7 @@
       abortToken: cancelToken.value.token,
     }).then(() => {
       cancelToken.value = null;
-      if (props.loadOnMount)
+      if (props.loadData)
         setTimeout(() => { scrollToTop(-70); }, 600);
     });
   };
@@ -106,7 +110,14 @@
     const el = document.getElementById(uniqueId.value);
     if (!el) return;
 
-    window.scrollTo(0, el.offsetTop + position);
+    const isInsideModal = el.closest('.modal');
+    if (isInsideModal) {
+      isInsideModal.scroll({
+        top: el.offsetTop + position,
+        behavior: 'smooth'
+      });
+    } else
+      window.scrollTo(0, el.offsetTop + position);
   };
 
 
@@ -119,31 +130,57 @@
 
   watch(pageIndex, handleIdChange);
 
-  watch(() => props.loadOnMount, (newVal) => {
+  watch(() => hasManyTargetRecords.value, (newVal) => {
+    if (props.loadData)
+      tableData.value = newVal ? [...newVal] : [];
+  });
+
+  watch(() => targetTotalItems.value, (newVal) => {
+    if (props.loadData)
+      totalRecords.value = newVal;
+  });
+
+  watch(() => loadHasManyTargetsError.value, (newVal) => {
+    if (props.loadData)
+      loadError.value = newVal;
+  });
+
+  watch(() => loadingHasManyTargets.value, (newVal) => {
+    if (props.loadData)
+      loadingRecords.value = newVal;
+  });
+
+  watch(() => props.loadData, (newVal) => {
     if (newVal) {
-      if (!hasManyTargetRecords || !hasManyTargetRecords.value || !hasManyTargetRecords.value.length) {
+      if (!tableData || !tableData.value || !tableData.value.length) {
         setTimeout(() => { scrollToBottom(); }, 700);
         handleIdChange();
-      } else 
-        setTimeout(() => { scrollToTop(-70); }, 200);
+        return;
+      }
+
+      setTimeout(() => { scrollToTop(-70); }, 200);
     }
+    
+    if (cancelToken.value)
+      cancelToken.value.cancel('[AssociationModelTable] onBeforeUnmount aborting previous request');
+  });
+
+  watch(() => props.modelId, (newVal) => {
+    tableData.value = []
+    loadError.value = null;
+    modelIdChanged.value = true;
+    pageIndex.value = 1;
   });
 
   onMounted(() => {
-    setHasManyTargetRecords(null, 0);
-    setLoadHasManyTargetsError(null);
-
-    if (props.loadOnMount) {
+    if (props.loadData) {
       setTimeout(() => { scrollToBottom(); }, 700);
       handleIdChange();
     }
   });
 
   onBeforeUnmount(() => {
-    if (cancelToken.value) {
-      cancelToken.value.cancel('onBeforeUnmount aborting previous request');
-    }
-    setHasManyTargetRecords(null, 0);
-    setLoadHasManyTargetsError(null);
+    if (cancelToken.value)
+      cancelToken.value.cancel('[AssociationModelTable] onBeforeUnmount aborting previous request');
   });
 </script>
