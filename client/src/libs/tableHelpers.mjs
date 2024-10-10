@@ -3,7 +3,7 @@ import currencyJs from 'currency.js';
 const USD = value => currencyJs(value, { symbol: '$ ', precision: 2 });
 
 const renderValue = (model, key, value, index) => {
-  // console.log('renderValue', model, key, value, index);
+  console.log('renderValue', model, key, value, index);
   switch (model) {
     case 'albums':
       switch (key) {

@@ -3,10 +3,10 @@
     <div class='modal-dialog modal-dialog-centered modal-lg'>
       <div class='modal-content'>
         <div class='modal-header'>
-          <h5 class='modal-title'>View detail</h5>
+          <h5 class='modal-title'>View detail model: {{ currentModel }}</h5>
           <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
         </div>
-        <div class='modal-body'>
+        <div class='modal-body p-0'>
           <RecordDetail :data-record='currentRecord' />
         </div>
         <div class='modal-footer'>
@@ -29,12 +29,14 @@
   const modal = ref(null);
   const emitter = inject('emitter');
   const currentRecord = ref(null);
+  const currentModel = ref(null);
 
   onMounted(() => {
     modal.value = new bootstrap.Modal(modalEl.value);
 
-    emitter.on('show-modal', ({ record }) => {
+    emitter.on('show-modal', ({ record, model }) => {
       currentRecord.value = record;
+      currentModel.value = model;
       modal.value.show();
     });
 

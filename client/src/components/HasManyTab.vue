@@ -68,7 +68,6 @@
   const loadIndex = ref(0);
   const props = defineProps({
     modelId: {
-      type: [String, Number, null, undefined],
       required: true,
     },
     loadData: {

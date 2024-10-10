@@ -8,7 +8,7 @@
 				:show-reload-button='true' @reload='handlePageChange' />
 		</div>
 		<div v-else ref='mainPanel'>
-			<RecordsTable :data='records' table-class='rounded-table'
+			<RecordsTable :records='records' table-class='rounded-table'
 				@row-click='handleRowClick'>
 				<template #default='{ data: { key, value, index } }'>
 					{{ renderValue(currentModel, key, value, index) }}
@@ -126,7 +126,12 @@
 	});
 
 	const handleRowClick = ({ record, index }) => {
+		console.log('RecordsPanel: handleRowClick', record, index);
 		emits('record-click', { record, index });
 	};
+
+	watch(() => records.value, (newVal/*, oldVal*/) => {
+		console.log('[RecordsPanel] records changed', newVal);
+	});
 
 </script>

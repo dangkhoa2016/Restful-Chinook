@@ -11,7 +11,7 @@
       </div>
     </div>
     <div v-else-if='loadData' :id='uniqueId'>
-      <RecordsTable :data='tableData'>
+      <RecordsTable :records='tableData'>
 				<template #default='{ data: { key, value, index } }'>
 					{{ renderValue(target, key, value, index) }}
 				</template>
@@ -50,7 +50,6 @@
 
   const props = defineProps({
     modelId: {
-      type: Number,
       required: true,
     },
     target: {

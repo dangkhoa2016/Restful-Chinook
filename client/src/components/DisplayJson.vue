@@ -1,7 +1,7 @@
 <template>
   <div class='list-group' v-if='currentModel'>
     <template v-for='(value, key) in record' :key='key'>
-      <a href='#' :class='fieldClass' @click.prevent='() => handleClick(key)'>
+      <a href='#' :class='fieldClass(key)' @click.prevent='() => handleClick(key)'>
         <span class='badge bg-primary rounded-pill'>{{ changeCase.capitalCase(key) }}</span>
         {{ renderValue(currentModel, key, value) }}
       </a>
@@ -18,6 +18,7 @@
 <script setup>
   import { inject } from 'vue';
   import changeCase from 'change-case';
+  import pluralize from 'pluralize';
 	import { renderValue } from '/src/libs/tableHelpers.mjs';
 
   const props = defineProps({
@@ -33,12 +34,28 @@
       required: false,
     },
   });
-  const fieldClass = 'list-group-item-action list-group-item d-flex justify-content-between align-items-center';
+
+  const fieldClass = (key) => {
+    const arr = ['list-group-item-action list-group-item d-flex justify-content-between align-items-center'];
+    if (isMainModelField(key))
+      arr.push('list-group-item-primary');
+    else
+      arr.push('pe-none');
+    return arr;
+  }
 
   const emitter = inject('emitter');
 
+  const isMainModelField = (key) => {
+    if (!props.showModal || !props.currentModel || !key)
+      return false;
+
+    const single_name = pluralize.singular(props.currentModel);
+    return key.indexOf(`${single_name}`) !== -1 && key.indexOf(`_id`) !== -1;
+  };
+
   const handleClick = (key) => {
-    if (!props.showModal || !key || key.indexOf('_id') === -1)
+    if (!isMainModelField(key))
       return;
 
     emitter.emit('show-modal', { model: props.currentModel, record: props.record });

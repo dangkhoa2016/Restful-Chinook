@@ -1,11 +1,14 @@
 <template>
-  <div class='my-4'>
+  <div class='my-4' :class='isInsideModal ? "px-4" : null'>
     <button class='btn btn-warning' type='button'
       aria-expanded='false' @click.prevent='toggleAssociations'>
       View associations
     </button>
   </div>
-  <div class='collapse my-4' ref='collapseAssociationsTab'>
+  <div ref='collapseAssociationsTab'
+    class='collapse my-4'
+    :class='isInsideModal ? "mb-0" : null'
+    >
     <nav class='nav nav-tabs justify-content-center mt-4'>
       <li class='nav-item' role='presentation'>
         <button class='nav-link' :class="{'active': showTab == 1}"
@@ -54,7 +57,6 @@
 
   const props = defineProps({
     modelId: {
-      type: [String, Number, null, undefined],
       required: false,
     },
   });
@@ -62,7 +64,6 @@
   const belongToTabId = ref(null);
   const hasManyTabId = ref(null);
   const isInsideModal = ref(false);
-
 
   onMounted(() => {
     belongToTabId.value = 'belongto-tab-' + (new Date()).getTime() + Math.floor(Math.random() * 1000);
@@ -122,7 +123,7 @@
   }
 
   const handleCollapseShown = (event) => {
-    setTimeout(() => { scrollToBottom(); }, 100);
+    setTimeout(() => { scrollToBottom(); }, 10);
     showTab.value = 1;
   };
 

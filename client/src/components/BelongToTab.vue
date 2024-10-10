@@ -1,6 +1,6 @@
 <template>
   <transition name='just-fade' mode='out-in'>
-    <LoadingBelongTo v-if='loadingBelongTosRef || forceLoading' />
+    <LoadingBelongTo v-if='loadingBelongTosRef || forceLoading' :id='`loading-${mainId}`' />
     <div v-else-if='loadBelongTosErrorRef'>
       <ErrorLoadRecords :message='loadBelongTosErrorRef'
         :show-reload-button='true' @reload='handleIdChange' />
@@ -65,7 +65,6 @@
   
   const props = defineProps({
     modelId: {
-      type: [String, Number, null, undefined],
       required: true,
     },
     loadData: {
@@ -87,9 +86,13 @@
     return currentModel.value ? `${currentModel.value}-${props.modelId}-${Math.floor(Math.random() * 1000)}` : '';
   });
 
-  const getModal = () => {
+  const getCurrentElement = () => {
     const id = mainId.value;
-    const el = document.querySelector(`#main-${id}`) || document.querySelector(`#nodata-${id}`);
+    return document.querySelector(`#main-${id},#nodata-${id},#loading-${id}`);
+  };
+
+  const getModal = () => {
+    const el = getCurrentElement();
     return el ? el.closest('.modal') : null;
   };
 
@@ -123,28 +126,27 @@
 
     fetchBelongTos('', currentModel.value, props.modelId, cancelToken.value.token).then(() => {
 			cancelToken.value = null;
-      setTimeout(() => {
-        scrollToBottom();
-      }, 500);
+      setTimeout(() => { scrollToBottom(); }, 550);
       isFetching.value = false;
 		});
   };
 
   const scrollToBottom = () => {
-    setTimeout(() => {
-      const modal = getModal();
-      if (modal) {
-        modal.scroll({
-          top: modal.scrollHeight,
-          behavior: 'smooth'
-        });
-      } else {
-        window.scroll({
-          top: document.body.scrollHeight,
-          behavior: 'smooth'
-        });
-      }
-    }, 20);
+    const el = getCurrentElement();
+    if (!el) return;
+    
+    const modal = getModal();
+    if (modal) {
+      modal.scroll({
+        top: el.offsetTop,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scroll({
+        top: el.offsetTop - 30,
+        behavior: 'smooth'
+      });
+    }
   }
 
   onMounted(() => {
@@ -153,7 +155,9 @@
 		});
 
     emitter.on('show-modal', ({ record, model }) => {
-      currentModel.value = model;
+      const modal = getModal();
+      if (modal)
+        currentModel.value = model;
     });
   });
 

@@ -15,19 +15,22 @@
             <RecordLoader />
           </td>
         </tr>
-        <tr v-else-if='data.length === 0'>
+        <tr v-else-if='records.length === 0'>
           <td>
             <ErrorLoadRecords message='No records found!' />
           </td>
         </tr>
-        <template v-else v-for='(record, index) in data' :key='index'>
-          <tr class='cursor-pointer' :class='{"table-warning": index == activeIndex }'
-            @click.prevent='handleRowClick(record, index)'>
-            <td v-for='(value, key) in record' :key='key' :data-original-value='value'>
-              <slot name='default' :data='{ value, key, index }'>
-                {{ value }}
-              </slot>
-            </td>
+        <template v-else>
+          <tr v-for='(record, rowIndex) in records'
+            :key='rowIndex'
+            :class="{ 'table-warning': rowActive(rowIndex) }"
+            @click='handleRowClick(rowIndex)'
+          >
+            <RecordRow :record="record" :index="rowIndex">
+              <template #default='slotData'>
+                <slot name='default' v-bind='slotData'></slot>
+              </template>
+            </RecordRow>
           </tr>
         </template>
       </tbody>
@@ -42,13 +45,14 @@
 </script>
 
 <script setup>
-  import { ref, defineProps, computed } from 'vue';
+  import { ref, defineProps, computed, watch } from 'vue';
   import changeCase from 'change-case';
   import RecordLoader from '/src/components/RecordLoader.vue';
   import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
+  import RecordRow from '/src/components/RecordRow.vue';
 
   const props = defineProps({
-    data: {
+    records: {
       type: Array,
       required: true,
     },
@@ -72,8 +76,8 @@
     let headers = [];
     if (props.headers && props.headers.length > 0)
       headers = props.headers;
-    else if (props.data && props.data.length > 0)
-      headers = Object.keys(props.data[0]);
+    else if (props.records && props.records.length > 0)
+      headers = Object.keys(props.records[0]);
 
     return headers.map((header) => {
       return {
@@ -83,8 +87,18 @@
     });
   });
 
-  const handleRowClick = (record, index) => {
+  const rowActive = (index) => {
+    return activeIndex.value === index;
+  };
+
+  const handleRowClick = (index) => {
+    const record = props.records[index];
+    console.log('RecordsTable: handleRowClick', record, index);
     activeIndex.value = index;
     emits('row-click', { record, index });
   };
+
+  watch(() => props.records, (newVal) => {
+    console.log('[RecordsTable] records changed', newVal);
+  });
 </script>
