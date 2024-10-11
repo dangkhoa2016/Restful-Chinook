@@ -10,8 +10,8 @@
 		<div v-else ref='mainPanel'>
 			<RecordsTable :records='records' table-class='rounded-table'
 				@row-click='handleRowClick'>
-				<template #default='{ data: { key, value, index } }'>
-					{{ renderValue(currentModel, key, value, index) }}
+				<template #default='{ data: { field, value, index } }'>
+					<RenderColumn :currentModel='currentModel' :field='field' :value='value' :index='index' />
 				</template>
 			</RecordsTable>
 			<Pagination v-if='totalItems' v-model='pageIndex'
@@ -36,12 +36,12 @@
 	import { ref, onMounted, onBeforeMount, inject, watch } from 'vue';
 	import axios from 'axios';
 	import { useTableStore, fetchRecords, setRecords, setLoadRecordsError } from '/src/stores/tableStore.mjs';
-	import { renderValue } from '/src/libs/tableHelpers.mjs';
 
 	import RecordLoader from '/src/components/RecordLoader.vue';
 	import RecordsTable from '/src/components/RecordsTable.vue';
 	import Pagination from '/src/components/Pagination.vue';
 	import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
+	import RenderColumn from '/src/components/RenderColumn.vue';
 
 
 	const emits = defineEmits(['record-click']);
@@ -126,12 +126,6 @@
 	});
 
 	const handleRowClick = ({ record, index }) => {
-		console.log('RecordsPanel: handleRowClick', record, index);
 		emits('record-click', { record, index });
 	};
-
-	watch(() => records.value, (newVal/*, oldVal*/) => {
-		console.log('[RecordsPanel] records changed', newVal);
-	});
-
 </script>

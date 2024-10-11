@@ -1,9 +1,9 @@
 <template>
   <div class='list-group' v-if='currentModel'>
-    <template v-for='(value, key) in record' :key='key'>
-      <a href='#' :class='fieldClass(key)' @click.prevent='() => handleClick(key)'>
-        <span class='badge bg-primary rounded-pill'>{{ changeCase.capitalCase(key) }}</span>
-        {{ renderValue(currentModel, key, value) }}
+    <template v-for='(value, field) in record' :key='field'>
+      <a href='#' :class='fieldClass(field)' @click.prevent='() => handleClick(field)'>
+        <span class='badge bg-primary rounded-pill'>{{ changeCase.capitalCase(field) }}</span>
+        <RenderColumn :currentModel='currentModel' :field='field' :value='value' />
       </a>
     </template>
   </div>
@@ -19,7 +19,7 @@
   import { inject } from 'vue';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
-	import { renderValue } from '/src/libs/tableHelpers.mjs';
+	import RenderColumn from '/src/components/RenderColumn.vue';
 
   const props = defineProps({
     record: {

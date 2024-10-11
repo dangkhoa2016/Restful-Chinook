@@ -12,8 +12,8 @@
     </div>
     <div v-else-if='loadData' :id='uniqueId'>
       <RecordsTable :records='tableData'>
-				<template #default='{ data: { key, value, index } }'>
-					{{ renderValue(target, key, value, index) }}
+				<template #default='{ data: { field, value, index } }'>
+					<RenderColumn :currentModel='currentModel' :field='field' :value='value' :index='index' />
 				</template>
 			</RecordsTable>
 			<Pagination v-if='totalRecords' v-model='pageIndex'
@@ -31,13 +31,9 @@
 
 <script setup>
   import { ref, inject, watch, computed, onMounted, onBeforeUnmount } from 'vue';
-  import axios from 'axios';
-  import changeCase from 'change-case';
-  import pluralize from 'pluralize';
-  import { renderValue } from '/src/libs/tableHelpers.mjs';
+  import axios from 'axios';  
   import {
     useAssociationStore,
-
     fetchHasManyTargets,
     setHasManyTargetRecords,
     setLoadHasManyTargetsError,
@@ -47,6 +43,7 @@
   import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
   import RecordsTable from '/src/components/RecordsTable.vue';
   import Pagination from '/src/components/Pagination.vue';
+	import RenderColumn from '/src/components/RenderColumn.vue';
 
   const props = defineProps({
     modelId: {

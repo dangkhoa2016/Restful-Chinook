@@ -1,6 +1,6 @@
 <template>
-  <td v-for='(value, key) in record' :key='key' :data-original-value='value'>
-    <slot name='default' :data='{ value, key, index }'>
+  <td v-for='(value, field) in record' :key='field' :data-original-value='value'>
+    <slot name='default' :data='{ field, value, index }'>
       {{ value }}
     </slot>
   </td>

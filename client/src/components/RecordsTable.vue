@@ -23,10 +23,10 @@
         <template v-else>
           <tr v-for='(record, rowIndex) in records'
             :key='rowIndex'
-            :class="{ 'table-warning': rowActive(rowIndex) }"
+            :class="{ 'table-warning': rowActive(rowIndex), 'cursor-pointer': true }"
             @click='handleRowClick(rowIndex)'
           >
-            <RecordRow :record="record" :index="rowIndex">
+            <RecordRow :record='record' :index='rowIndex'>
               <template #default='slotData'>
                 <slot name='default' v-bind='slotData'></slot>
               </template>
@@ -50,6 +50,8 @@
   import RecordLoader from '/src/components/RecordLoader.vue';
   import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
   import RecordRow from '/src/components/RecordRow.vue';
+  const currentActiveRowIndex = ref(null);
+  const previousActiveRowIndex = ref(null);
 
   const props = defineProps({
     records: {
@@ -70,7 +72,6 @@
   });
 
   const emits = defineEmits(['row-click']);
-  const activeIndex = ref(null);
 
   const tableHeaders = computed(() => {
     let headers = [];
@@ -87,18 +88,12 @@
     });
   });
 
-  const rowActive = (index) => {
-    return activeIndex.value === index;
-  };
+  const rowActive = (rowIndex) => rowIndex === currentActiveRowIndex.value;
 
   const handleRowClick = (index) => {
     const record = props.records[index];
-    console.log('RecordsTable: handleRowClick', record, index);
-    activeIndex.value = index;
+    previousActiveRowIndex.value = currentActiveRowIndex.value;
+    currentActiveRowIndex.value = index;
     emits('row-click', { record, index });
   };
-
-  watch(() => props.records, (newVal) => {
-    console.log('[RecordsTable] records changed', newVal);
-  });
 </script>

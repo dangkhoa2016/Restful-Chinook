@@ -115,3 +115,16 @@ body {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
+
+.text-purple {
+  color: var(--bs-purple);
+}
+.text-orange {
+  color: var(--bs-orange);
+}
+.text-teal {
+  color: var(--bs-teal);
+}
+.text-pink {
+  color: var(--bs-pink);
+}
