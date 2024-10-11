@@ -1,16 +1,16 @@
 <template>
   <transition name='just-fade' mode='out-in'>
-    <LoadingBelongTo v-if='loadingHasManysRef || firstLoad' />
+    <LoadingBelongTo v-if='loadingHasManysRef || firstLoad' :id='`loading-${mainId}`' />
     <div v-else-if='loadHasManysErrorRef'>
       <ErrorLoadRecords :message='loadHasManysErrorRef'
         :show-reload-button='true' @reload='handleIdChange' />
     </div>
-    <div v-else-if='!hasManysRef || hasManysRef.length == 0'>
+    <div v-else-if='!hasManysRef || hasManysRef.length == 0' :id='`nodata-${mainId}`'>
       <div class='alert alert-info m-0' role='alert'>
         No associations found
       </div>
     </div>
-    <div v-else ref='mainEl'>
+    <div v-else :id='`main-${mainId}`'>
       <nav class='nav nav-tabs justify-content-center' ref='hasManyNav'>
         <li v-for='(item, index) in hasManysRef' :key='index'
           class='nav-item' role='presentation'>
@@ -43,7 +43,7 @@
 </script>
 
 <script setup>
-  import { ref, inject, watch, computed, onMounted, onBeforeMount, onBeforeUnmount } from 'vue';
+  import { ref, inject, watch, computed, onMounted, onBeforeUnmount } from 'vue';
 	import axios from 'axios';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
@@ -51,8 +51,8 @@
     useAssociationStore,
 
     fetchHasManys,
-    setHasManys,
-    setLoadHasManysError,
+    // setHasManys,
+    // setLoadHasManysError,
   } from '/src/stores/associationStore.mjs';
 
   import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
@@ -64,7 +64,6 @@
   const currentModel = ref(null);
   const firstLoad = ref(true);
   const hasManyNav = ref(null);
-  const mainEl = ref(null);
   const loadIndex = ref(0);
   const props = defineProps({
     modelId: {
@@ -73,6 +72,9 @@
     loadData: {
       type: Boolean,
     },
+    isInsideModal: {
+      type: Boolean,
+    }
   });
 
   const {
@@ -85,7 +87,6 @@
   const loadHasManysErrorRef = ref(null);
 	const cancelToken = ref(null);
   const isFetching = ref(false);
-  const isInsideModal = ref(false);
 
   const getModelName = (model) => {
     return changeCase.capitalCase(pluralize.singular(model));
@@ -110,9 +111,10 @@
   };
 
   const scrollToBottom = () => {
-    if (isInsideModal.value)
+    if (props.isInsideModal)
       return;
 
+    console.log('scrolling to bottom');
     window.scroll({
       top: document.body.scrollHeight,
       behavior: 'smooth'
@@ -132,15 +134,13 @@
 
   onMounted(() => {
 		emitter.on('load-table', (model) => {
-      currentModel.value = model;
-
-      setHasManys(null);
-      setLoadHasManysError(null);
-      loadIndex.value = 0;
+      if (!getModal())
+        currentModel.value = model;
 		});
 
-    emitter.on('show-modal', ({ record, model }) => {
-      currentModel.value = model;
+    emitter.on('show-modal', ({ model }) => {
+      if (getModal())
+        currentModel.value = model;
     });
   });
 
@@ -153,6 +153,16 @@
     });
 
     loadIndex.value = index;
+  };
+
+  const getCurrentElement = () => {
+    const id = mainId.value;
+    return document.querySelector(`#main-${id},#nodata-${id},#loading-${id}`);
+  };
+
+  const getModal = () => {
+    const el = getCurrentElement();
+    return el ? el.closest('.modal') : null;
   };
 
   watch(() => hasManys.value, (newVal) => {
@@ -177,18 +187,13 @@
           el.removeEventListener('shown.bs.tab', handleTabChange);
         });
       }
+
+      return;
     };
 
     newVal.querySelectorAll('.nav-item').forEach((el) => {
       el.addEventListener('shown.bs.tab', handleTabChange);
     });
-  });
-
-  watch(() => mainEl.value, (newVal) => {
-    if (newVal)
-      isInsideModal.value = !!newVal.closest('.modal');
-    else
-      isInsideModal.value = false;
   });
 
   watch(() => props.loadData, (newVal) => {
@@ -199,5 +204,14 @@
       handleIdChange();
     else
       setTimeout(() => { scrollToBottom(); }, 10);
+  });
+
+  watch(() => currentModel.value, (newVal, oldVal) => {
+    if (newVal) {
+      loadIndex.value = 0;
+      hasManysRef.value = [];
+      loadingHasManysRef.value = false;
+      loadHasManysErrorRef.value = null;
+    }
   });
 </script>

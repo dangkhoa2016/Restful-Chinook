@@ -26,7 +26,8 @@
         <div v-for='(item, index) in belongTosRef' :key='index'
           class='tab-pane fade' :class='{ show: index == 0, active: index == 0 }'
           :id='`${item.name}-tab`' role='tabpanel' :aria-labelledby='`${item.name}-tab`'>
-          <DisplayJson v-if='item.record' :record='item.record' :current-model='item.name' :show-modal='true' />
+          <DisplayJson v-if='item.record' :record='item.record'
+            :current-model='item.name' :show-modal='!isInsideModal' />
           <div v-else class='alert alert-info m-0' role='alert'>
             No record found
           </div>
@@ -43,8 +44,7 @@
 </script>
 
 <script setup>
-  import { ref, inject, watch, onMounted, computed,
-    onBeforeMount, nextTick, onBeforeUnmount } from 'vue';
+  import { ref, inject, watch, onMounted, computed, onBeforeUnmount } from 'vue';
 	import axios from 'axios';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
@@ -52,8 +52,8 @@
     useAssociationStore,
 
     fetchBelongTos,
-    setBelongTos,
-    setLoadBelongTosError,
+    // setBelongTos,
+    // setLoadBelongTosError,
   } from '/src/stores/associationStore.mjs';
 
   import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
@@ -70,6 +70,9 @@
     loadData: {
       type: Boolean,
     },
+    isInsideModal: {
+      type: Boolean,
+    }
   });
 
   const {
@@ -115,6 +118,10 @@
     return changeCase.capitalCase(pluralize.singular(model));
   };
 
+  const hasBelongTo = computed(() => {
+    return belongTosRef.value && Object.keys(belongTosRef.value).length > 0;
+  });
+
   const handleIdChange = () => {
 		if (!currentModel.value) return;
 		if (cancelToken.value)
@@ -126,6 +133,7 @@
 
     fetchBelongTos('', currentModel.value, props.modelId, cancelToken.value.token).then(() => {
 			cancelToken.value = null;
+      console.log('[BelongToTab] handleIdChange', currentModel.value);
       setTimeout(() => { scrollToBottom(); }, 550);
       isFetching.value = false;
 		});
@@ -136,6 +144,7 @@
     if (!el) return;
     
     const modal = getModal();
+    console.log('[BelongToTab] scrollToBottom modal', modal, getCurrentElement());
     if (modal) {
       modal.scroll({
         top: el.offsetTop,
@@ -151,12 +160,12 @@
 
   onMounted(() => {
 		emitter.on('load-table', (model) => {
-      currentModel.value = model;
+      if (!getModal())
+        currentModel.value = model;
 		});
 
-    emitter.on('show-modal', ({ record, model }) => {
-      const modal = getModal();
-      if (modal)
+    emitter.on('show-modal', ({ model }) => {
+      if (getModal())
         currentModel.value = model;
     });
   });
@@ -167,14 +176,14 @@
   });
 
   watch(() => props.modelId, (newVal) => {
-    belongTosRef.value = [];
+    belongTosRef.value = null;
     loadBelongTosErrorRef.value = null;
     loadingBelongTosRef.value = false;
   });
 
   watch(() => props.loadData, (newVal) => {
     if (newVal) {
-      if (!belongTosRef.value || belongTosRef.value.length == 0) {
+      if (!hasBelongTo.value) {
         handleIdChange();
         setTimeout(() => { scrollToBottom(); }, 650);
         return;
@@ -184,7 +193,14 @@
       return;
     }
     
-    if (!belongTosRef.value || belongTosRef.value.length == 0)
+    if (!hasBelongTo.value)
       forceLoading.value = true;
+  });
+
+  watch(() => currentModel.value, (newVal, oldVal) => {
+    if (newVal) {
+      belongTosRef.value = null;
+      forceLoading.value = true;
+    }
   });
 </script>

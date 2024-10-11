@@ -13,8 +13,6 @@
 </script>
 
 <script setup>
-  import { ref, defineProps, computed, watch } from 'vue';
-
   const props = defineProps({
     record: {
       type: Object,

@@ -13,7 +13,7 @@
     <div v-else-if='loadData' :id='uniqueId'>
       <RecordsTable :records='tableData'>
 				<template #default='{ data: { field, value, index } }'>
-					<RenderColumn :currentModel='currentModel' :field='field' :value='value' :index='index' />
+					<RenderColumn :currentModel='target' :field='field' :value='value' :index='index' />
 				</template>
 			</RecordsTable>
 			<Pagination v-if='totalRecords' v-model='pageIndex'
@@ -35,8 +35,8 @@
   import {
     useAssociationStore,
     fetchHasManyTargets,
-    setHasManyTargetRecords,
-    setLoadHasManyTargetsError,
+    // setHasManyTargetRecords,
+    // setLoadHasManyTargetsError,
   } from '/src/stores/associationStore.mjs';
 
   import LoadingBelongTo from '/src/components/LoadingBelongTo.vue';
@@ -106,9 +106,9 @@
     const el = document.getElementById(uniqueId.value);
     if (!el) return;
 
-    const isInsideModal = el.closest('.modal');
-    if (isInsideModal) {
-      isInsideModal.scroll({
+    const modal = el.closest('.modal');
+    if (modal) {
+      modal.scroll({
         top: el.offsetTop + position,
         behavior: 'smooth'
       });
@@ -116,12 +116,23 @@
       window.scrollTo(0, el.offsetTop + position);
   };
 
+  /*
+  const isInsideModal = computed(() => {
+    const el = document.getElementById(uniqueId.value);
+    return el ? !!el.closest('.modal') : false;
+  });
+  */
 
   const scrollToBottom = () => {
+    /*
+    if (isInsideModal.value)
+      return;
+
     window.scroll({
       top: document.body.scrollHeight,
       behavior: 'smooth'
     });
+    */
   }
 
   watch(pageIndex, handleIdChange);
@@ -148,7 +159,7 @@
 
   watch(() => props.loadData, (newVal) => {
     if (newVal) {
-      if (!tableData || !tableData.value || !tableData.value.length) {
+      if (!tableData.value || !tableData.value.length) {
         setTimeout(() => { scrollToBottom(); }, 700);
         handleIdChange();
         return;

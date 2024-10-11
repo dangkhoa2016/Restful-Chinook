@@ -45,13 +45,12 @@
 </script>
 
 <script setup>
-  import { ref, defineProps, computed, watch } from 'vue';
+  import { ref, computed } from 'vue';
   import changeCase from 'change-case';
   import RecordLoader from '/src/components/RecordLoader.vue';
   import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
   import RecordRow from '/src/components/RecordRow.vue';
   const currentActiveRowIndex = ref(null);
-  const previousActiveRowIndex = ref(null);
 
   const props = defineProps({
     records: {
@@ -92,7 +91,6 @@
 
   const handleRowClick = (index) => {
     const record = props.records[index];
-    previousActiveRowIndex.value = currentActiveRowIndex.value;
     currentActiveRowIndex.value = index;
     emits('row-click', { record, index });
   };

@@ -1,8 +1,8 @@
 
 import { reactive, toRefs } from 'vue';
-import api, { endpoint } from '/src/libs/api.mjs';
+// import api, { endpoint } from '/src/libs/api.mjs';
 import { getLocalStorageItem, setLocalStorageItem } from '/src/libs/localStorageHelpers.mjs';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { sleep } from '/src/libs/helpers.mjs';
 
 // Create a reactive store
 const authStore = reactive({

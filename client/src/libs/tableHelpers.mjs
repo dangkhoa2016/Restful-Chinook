@@ -76,7 +76,7 @@ const renderValue = (model, field, value, index) => {
   }
 };
 
-const renderEmployerValue = (value, key, index) => {
+const renderEmployerValue = (value, key/*, index*/) => {
   // console.log('renderEmployerValue', value, key, index);
   switch (key) {
     case 'employee_id':
@@ -89,7 +89,7 @@ const renderEmployerValue = (value, key, index) => {
   }
 }
 
-const renderInvoiceValue = (value, key, index) => {
+const renderInvoiceValue = (value, key/*, index*/) => {
   // console.log('renderInvoiceValue', value, key, index);
   switch (key) {
     case 'invoice_id':
@@ -103,7 +103,7 @@ const renderInvoiceValue = (value, key, index) => {
   }
 }
 
-const renderTrackValue = (value, key, index) => {
+const renderTrackValue = (value, key/*, index*/) => {
   // console.log('renderTrackValue', value, key, index);
   switch (key) {
     case 'track_id':

@@ -1,4 +1,5 @@
 const db = require('./db-connection');
+// const sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); };
 
 const extractQuery = (query) => {
   if (!query || Object.keys(query).length === 0)
@@ -22,8 +23,6 @@ const extractQuery = (query) => {
     params: params
   };
 };
-
-const sleep = (ms) => { return new Promise(resolve => setTimeout(resolve, ms)); };
 
 class Helper {
   async getAll(tableName, options = {}) {
@@ -51,7 +50,7 @@ class Helper {
 
       return { status: 200, result: { rows, total: total["COUNT(*)"] } };
     } catch (ex) {
-      return { status: 500, result: { error: ex.message } };
+      return this.handleError(ex, 'getAll');
     }
   }
 
@@ -67,67 +66,63 @@ class Helper {
       const rows = await db.asyncGet(sql, params);
       return { status: 200, result: rows };
     } catch (ex) {
-      return { status: 500, result: { error: ex.message } };
+      return this.handleError(ex, 'getById');
     }
   }
 
+  async executeQuery(sql, params, countQuery, limit, offset) {
+    try {
+      const rows = await db.asyncAll(sql, params.concat(limit, offset));
+      console.log('[executeQuery] rows', rows);
+      let total = 0;
+      if (countQuery) {
+        const result = await db.asyncGet(countQuery, params);
+        console.log('[executeQuery] total', result);
+        total = result["COUNT(*)"];
+      }
+      return { status: 200, result: { rows, total } };
+    } catch (ex) {
+      return this.handleError(ex, 'executeQuery');
+    }
+  }
+  
   async getByRawQuery(query, params = [], options = {}) {
-    if (!query)
+    if (!query) {
       return { status: 400, result: { error: 'Please provide query' } };
-
-    let { limit, offset } = options;
-    if (!limit)
-      limit = 10;
-    if (!offset)
-      offset = 0;
-
+    }
+  
+    let { limit = 10, offset = 0 } = options;
+  
     console.log('[getByRawQuery] query', query);
-
+  
     const sql = `${query} LIMIT ? OFFSET ?`;
     console.log(`[getByRawQuery] select: ${sql}`, params.concat(limit, offset));
     const countQuery = `SELECT COUNT(*) FROM (${query})`;
     console.log(`[getByRawQuery] count: ${countQuery}`, params);
-
-    try {
-      const rows = await db.asyncAll(sql, params.concat(limit, offset));
-      console.log('[getByRawQuery] rows', rows);
-      const total = await db.asyncGet(countQuery, params);
-      console.log('[getByRawQuery] total', total);
-      return { status: 200, result: { rows, total: total["COUNT(*)"] } };
-    } catch (ex) {
-      console.log('[getByRawQuery] error', ex);
-      return { status: 500, result: { error: ex.message } };
-    }
+  
+    return await this.executeQuery(sql, params, countQuery, limit, offset);
   }
-
+  
   async getByQuery(tableName, query, options = {}) {
     const { where, params } = extractQuery(query);
-
-    let { limit, offset } = options;
-    if (!limit)
-      limit = 10;
-    if (!offset)
-      offset = 0;
-
-    if (!where || !params.length)
+  
+    let { limit = 10, offset = 0, count = true } = options;
+  
+    if (!where || !params.length) {
       return { status: 400, result: { error: 'Please provide field and value' } };
-
-    const sql = `SELECT * FROM ${tableName} where ${where} LIMIT ? OFFSET ?`;
-    console.log(`[getByQuery] select: ${sql}`, params.concat(limit, offset));
-    const countQuery = `SELECT COUNT(*) FROM ${tableName} where ${where}`;
-    console.log(`[getByQuery] count: ${countQuery}`, params);
-
-    try {
-      const rows = await db.asyncAll(sql, params.concat(limit, offset));
-      console.log('[getByQuery] rows', rows);
-      const total = await db.asyncGet(countQuery, params);
-      console.log('[getByQuery] total', total);
-      return { status: 200, result: { rows, total: total["COUNT(*)"] } };
-    } catch (ex) {
-      console.log('[getByQuery] error', ex);
-      return { status: 500, result: { error: ex.message } };
     }
-  }
+  
+    const sql = `SELECT * FROM ${tableName} WHERE ${where} LIMIT ? OFFSET ?`;
+    console.log(`[getByQuery] select: ${sql}`, params.concat(limit, offset));
+
+    let countQuery = '';
+    if (count) {
+      countQuery = `SELECT COUNT(*) FROM ${tableName} WHERE ${where}`;
+      console.log(`[getByQuery] count: ${countQuery}`, params);
+    }
+  
+    return await this.executeQuery(sql, params, countQuery, limit, offset);
+  }  
 
   async create(tableName, data) {
     if (!data || Object.keys(data).length === 0)
@@ -156,26 +151,45 @@ class Helper {
     }
   }
 
-  async update(tableName, data, query) {
-    if (!data)
+  async checkExists(tableName, query) {
+    const isExists = await this.getById(tableName, query);
+  
+    if (!isExists)
+      return;
+  
+    switch (isExists.status) {
+      case 500:
+        return isExists;
+      case 400:
+        return { status: 404, result: { error: 'Not found' } };
+      case 200:
+        return isExists.result ? undefined : { status: 404, result: { error: 'Not found' } };
+      default:
+        return { status: 500, result: { error: 'Unexpected status' } }; // Optional handling for unexpected statuses
+    }
+  }
+
+  async verifyData(tableName, data, query) {
+    if (!data || Object.keys(data).length === 0)
       return { status: 422, result: { error: 'Please provide data' } };
 
     let { where, params } = extractQuery(query);
     if (!where || !params.length)
       return { status: 400, result: { error: 'Please provide field and value' } };
 
-    const isExists = await this.getById(tableName, query);
-    if (isExists.status === 500)
+    const isExists = await this.checkExists(tableName, query);
+    if (isExists)
       return isExists;
-    else if (isExists.status === 400)
-      return { status: 404, result: { error: 'Not found' } };
-    else if (isExists.status === 200 && !isExists.result)
-      return { status: 404, result: { error: 'Not found' } };
+  }
+
+  async update(tableName, data, query) {
+    const hasError = await this.verifyData(tableName, data, query);
+    if (hasError)
+      return hasError;
+
+    let { where, params } = extractQuery(query);
 
     const setFields = Object.keys(data).map(key => `${key} = ?`).join(',');
-    if (Object.keys(data).length === 0)
-      return { status: 422, result: { error: 'Please provide data' } };
-
     const values = Object.values(data);
     const updateParams = [...values, ...params];
 
@@ -188,8 +202,7 @@ class Helper {
       const row = await db.asyncGet(sql, params);
       return { status: 200, result: row };
     } catch (ex) {
-      console.log('[update] error', ex);
-      return { status: 500, result: { error: ex.message } };
+      return this.handleError(ex, 'update');
     }
   }
 
@@ -207,8 +220,13 @@ class Helper {
       return { status: 200, result: { [params]: 'Deleted' } };
     }
     catch (ex) {
-      return { status: 500, result: { error: ex.message } };
+      return this.handleError(ex, 'delete');
     }
+  }
+
+  handleError(ex, function_name) {
+    console.log(`[${function_name}] error`, ex);
+    return { status: 500, result: { error: ex.message } };
   }
 }
 

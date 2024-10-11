@@ -1,7 +1,6 @@
 
 import { reactive, toRefs } from 'vue';
 import api, { endpoint } from '/src/libs/api.mjs';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Create a reactive store
 const tableStore = reactive({

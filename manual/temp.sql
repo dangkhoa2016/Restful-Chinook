@@ -256,3 +256,5 @@ SELECT album_id, COUNT(*) AS track_count FROM tracks GROUP BY album_id;
 SELECT track_id, COUNT(*) AS album_count FROM tracks GROUP BY album_id HAVING album_count > 1;
 
 select * from tracks where album_id = 1;
+
+update customers set support_rep_id = 6 where customer_id = 55;

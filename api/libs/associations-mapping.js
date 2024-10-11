@@ -1,124 +1,139 @@
+const oneToMany = 'one-to-many';
+const manyToOne = 'many-to-one';
+const artist_id = 'artist_id';
+const album_id = 'album_id';
+const track_id = 'track_id';
+const genre_id = 'genre_id';
+const media_type_id = 'media_type_id';
+const playlist_id = 'playlist_id';
+const employee_id = 'employee_id';
+const customer_id = 'customer_id';
+const invoice_id = 'invoice_id';
+const support_rep_id = 'support_rep_id';
+const reports_to = 'reports_to';
+
+
 module.exports = {
   'albums': {
     'artists': {
-      'type': 'many-to-one',
-      'field': 'artist_id',
-      'field_target': 'artist_id',
+      'type': manyToOne,
+      'field': artist_id,
+      'field_target': artist_id,
     },
     'tracks': {
-      'type': 'one-to-many',
-      'field': 'album_id',
-      'field_target': 'album_id',
+      'type': oneToMany,
+      'field': album_id,
+      'field_target': album_id,
     },
   },
   'artists': {
     'albums': {
-      'type': 'one-to-many',
-      'field': 'artist_id',
-      'field_target': 'artist_id',
+      'type': oneToMany,
+      'field': artist_id,
+      'field_target': artist_id,
     },
   },
   'customers': {
     'employees': {
-      'type': 'many-to-one',
-      'field': 'support_rep_id',
-      'field_target': 'employee_id',
+      'type': manyToOne,
+      'field': support_rep_id,
+      'field_target': employee_id,
     },
     'invoices': {
-      'type': 'one-to-many',
-      'field': 'customer_id',
-      'field_target': 'customer_id',
+      'type': oneToMany,
+      'field': customer_id,
+      'field_target': customer_id,
     },
   },
   'employees': {
     'customers': {
-      'type': 'one-to-many',
-      'field': 'employee_id',
-      'field_target': 'support_rep_id',
+      'type': oneToMany,
+      'field': employee_id,
+      'field_target': support_rep_id,
     },
     'employees': {
-      'type': 'many-to-one',
-      'field': 'reports_to',
-      'field_target': 'employee_id',
+      'type': manyToOne,
+      'field': reports_to,
+      'field_target': employee_id,
     },
   },
   'genres': {
     'tracks': {
-      'type': 'one-to-many',
-      'field': 'genre_id',
-      'field_target': 'genre_id',
+      'type': oneToMany,
+      'field': genre_id,
+      'field_target': genre_id,
     },
   },
   'invoices': {
     'customers': {
-      'type': 'many-to-one',
-      'field': 'customer_id',
-      'field_target': 'customer_id',
+      'type': manyToOne,
+      'field': customer_id,
+      'field_target': customer_id,
     },
     'invoice_lines': {
-      'type': 'one-to-many',
-      'field': 'invoice_id',
-      'field_target': 'invoice_id',
+      'type': oneToMany,
+      'field': invoice_id,
+      'field_target': invoice_id,
     },
   },
   'invoice_lines': {
     'invoices': {
-      'type': 'many-to-one',
-      'field': 'invoice_id',
-      'field_target': 'invoice_id',
+      'type': manyToOne,
+      'field': invoice_id,
+      'field_target': invoice_id,
     },
     'tracks': {
-      'type': 'many-to-one',
-      'field': 'track_id',
-      'field_target': 'track_id',
+      'type': manyToOne,
+      'field': track_id,
+      'field_target': track_id,
     },
   },
   'media_types': {
     'tracks': {
-      'type': 'one-to-many',
-      'field': 'media_type_id',
-      'field_target': 'media_type_id',
+      'type': oneToMany,
+      'field': media_type_id,
+      'field_target': media_type_id,
     },
   },
   'playlists': {
     'playlists_tracks': {
-      'type': 'one-to-many',
-      'field': 'playlist_id',
-      'field_target': 'playlist_id',
+      'type': oneToMany,
+      'field': playlist_id,
+      'field_target': playlist_id,
     },
   },
   'playlists_tracks': {
     'playlists': {
-      'type': 'many-to-one',
-      'field': 'playlist_id',
-      'field_target': 'playlist_id',
+      'type': manyToOne,
+      'field': playlist_id,
+      'field_target': playlist_id,
     },
     'tracks': {
-      'type': 'many-to-one',
-      'field': 'track_id',
-      'field_target': 'track_id',
+      'type': manyToOne,
+      'field': track_id,
+      'field_target': track_id,
     },
   },
   'tracks': {
     'albums': {
-      'type': 'many-to-one',
-      'field': 'album_id',
-      'field_target': 'album_id',
+      'type': manyToOne,
+      'field': album_id,
+      'field_target': album_id,
     },
     'genres': {
-      'type': 'many-to-one',
-      'field': 'genre_id',
-      'field_target': 'genre_id',
+      'type': manyToOne,
+      'field': genre_id,
+      'field_target': genre_id,
     },
     'media_types': {
-      'type': 'many-to-one',
-      'field': 'media_type_id',
-      'field_target': 'media_type_id',
+      'type': manyToOne,
+      'field': media_type_id,
+      'field_target': media_type_id,
     },
     'playlists_tracks': {
-      'type': 'one-to-many',
-      'field': 'track_id',
-      'field_target': 'track_id',
+      'type': oneToMany,
+      'field': track_id,
+      'field_target': track_id,
     },
   },
 }

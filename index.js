@@ -32,6 +32,18 @@ app.use(express.static(path.join(__dirname, 'client')));
 // API routes
 app.use('/api', api);
 
+// favicon
+const iconPath = path.join(__dirname, 'client/favicon.ico');
+app.use('/favicon.ico', (req, res) => {
+  res.type('image/x-icon');
+  res.sendFile(iconPath);
+});
+const pngPath = path.join(__dirname, 'client/favicon.png');
+app.use('/favicon.png', (req, res) => {
+  res.type('image/png');
+  res.sendFile(pngPath);
+});
+
 // Serve the index.html file for all other requests
 app.get('*', (req, res) => {
   const indexHtml = path.join(__dirname, 'client/index.html');

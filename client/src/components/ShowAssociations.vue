@@ -26,11 +26,11 @@
     <div class='tab-content bg-white rounded'>
       <div class='tab-pane fade p-4' :class="{'show active': showTab == 1}"
         :id='belongToTabId' role='tabpanel' :aria-labelledby='belongToTabId'>
-        <BelongToTab :model-id='modelId' :load-data='showTab == 1' />
+        <BelongToTab :model-id='modelId' :load-data='showTab == 1' :is-inside-modal='isInsideModal' />
       </div>
       <div class='tab-pane fade p-4' :class="{'show active': showTab == 2}"
         :id='hasManyTabId' role='tabpanel' :aria-labelledby='hasManyTabId'>
-        <HasManyTab :model-id='modelId' :load-data='showTab == 2' />
+        <HasManyTab :model-id='modelId' :load-data='showTab == 2' :is-inside-modal='isInsideModal' />
       </div>
     </div>
   </div>
@@ -116,6 +116,9 @@
   };
 
   const scrollToBottom = () => {
+    if (isInsideModal.value)
+      return;
+
     window.scroll({
       top: document.body.scrollHeight,
       behavior: 'smooth'

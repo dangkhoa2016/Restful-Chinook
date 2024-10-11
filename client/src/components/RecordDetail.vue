@@ -34,7 +34,7 @@
 </script>
 
 <script setup>
-  import { ref, computed, watch, inject, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, computed, watch, inject, onMounted } from 'vue';
 
   import ShowAssociations from '/src/components/ShowAssociations.vue';
   import DisplayJson from '/src/components/DisplayJson.vue';

@@ -1,9 +1,11 @@
 <template>
-  <div class='list-group' v-if='currentModel'>
+  <div class='list-group'>
     <template v-for='(value, field) in record' :key='field'>
       <a href='#' :class='fieldClass(field)' @click.prevent='() => handleClick(field)'>
         <span class='badge bg-primary rounded-pill'>{{ changeCase.capitalCase(field) }}</span>
-        <RenderColumn :currentModel='currentModel' :field='field' :value='value' />
+        <div class='d-flex flex-column align-items-end'>
+          <RenderColumn :currentModel='currentModel' :field='field' :value='value' />
+        </div>
       </a>
     </template>
   </div>
@@ -39,8 +41,8 @@
     const arr = ['list-group-item-action list-group-item d-flex justify-content-between align-items-center'];
     if (isMainModelField(key))
       arr.push('list-group-item-primary');
-    else
-      arr.push('pe-none');
+    // else
+    //   arr.push('pe-none');
     return arr;
   }
 
