@@ -30,9 +30,9 @@ const fetchRecords = async (token, model, limit, offset, abortToken) => {
   tableStore.loadRecordsError = null;
   // await sleep(10000);
 
-  if (abortToken && abortToken.reason) {
-    // console.log('Aborted fetch records', model);
-    return;
+  if (abortToken?.reason) {
+    // console.log('fetchRecords: Aborted', model);
+    return null;
   }
 
   try {
@@ -41,14 +41,14 @@ const fetchRecords = async (token, model, limit, offset, abortToken) => {
         limit, offset
       },
       headers: {
-        'x-access-token': `${token}`
+        'x-access-token': token
       },
       cancelToken: abortToken
     });
 
-    if (abortToken && abortToken.reason) {
-      // console.log('Aborted fetch records', model);
-      return;
+    if (abortToken?.reason) {
+      // console.log('fetchRecords: Aborted', model);
+      return null;
     }
 
     const { rows = [], total: totalItems = 0, errors } = response.data || {};
@@ -57,7 +57,7 @@ const fetchRecords = async (token, model, limit, offset, abortToken) => {
 
     setRecords(rows, totalItems);
   } catch (ex) {
-    console.log('Error fetch records', ex);
+    // console.log('Error fetch records', ex);
     tableStore.loadRecordsError = ex.message;
   }
 

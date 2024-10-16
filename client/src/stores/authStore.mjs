@@ -28,14 +28,14 @@ const setAuthInfo = (authInfo) => {
 
 
 // Actions
-const login = (username, password) => {
+const login = (/* username, password */) => {
   authStore.errorLogin = null;
   authStore.isProcessing = true;
 
-  console.log('logining...', username, password);
+  // console.log('logining...', username, password);
 
   sleep(3000).then(async () => {
-    console.log('logining... done at, ', new Date().toISOString());
+    // console.log('logining... done at, ', new Date().toISOString());
   });
 };
 
@@ -49,7 +49,7 @@ const init = async () => {
   if (!authInfo)
     return;
 
-  console.log('authInfo', authInfo);
+  // console.log('authInfo', authInfo);
 };
 
 

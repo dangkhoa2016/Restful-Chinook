@@ -1,5 +1,6 @@
 <template>
-	<template v-if='currentModel'>
+
+	<div v-if='currentModel'>
 		<div v-if='loadingRecords' class='card text-center pt-4 top-30-percent'>
 			<RecordLoader :message='currentModel' />
 		</div>
@@ -18,12 +19,13 @@
 				:total-items='totalItems'
 				:items-per-page='itemsPerPage' />
 		</div>
-	</template>
+	</div>
 	<div v-else class='card text-center pt-4 top-30-percent'>
 		<h3 class='text-center'>Select a model to view records</h3>
 		<img src='/src/assets/images/select-model.gif'
 			width='100' class='mx-auto' />
 	</div>
+
 </template>
 
 <script>
@@ -35,6 +37,7 @@
 <script setup>
 	import { ref, onMounted, onBeforeMount, inject, watch } from 'vue';
 	import axios from 'axios';
+
 	import { useTableStore, fetchRecords, setRecords, setLoadRecordsError } from '/src/stores/tableStore.mjs';
 
 	import RecordLoader from '/src/components/RecordLoader.vue';
@@ -56,6 +59,7 @@
   const { records, loadingRecords, totalItems = 0, /*totalPages = 0, */ loadRecordsError } = useTableStore();
 	const cancelToken = ref(null);
 	const mainPanel = ref(null);
+
 
   const handlePageChange = () => {
 		if (!currentModel.value) return;
@@ -79,28 +83,6 @@
     window.scrollTo(0, 0);
   };
 
-
-  onBeforeMount(() => {
-    setRecords([], 0);
-    setLoadRecordsError(null);
-  });
-
-  onMounted(() => {
-		emitter.on('load-table', (model) => {
-			currentModel.value = model;
-		});
-  });
-
-  watch(() => loadRecordsError.value, (newVal/*, oldVal*/) => {
-    console.log('loadRecordsError', newVal);
-  });
-
-  watch(pageIndex, () => {
-		emitter.emit('model-page-change', pageIndex.value);
-    scrollToTop();
-    setTimeout(handlePageChange, 500);
-  });
-
 	const hidePanel = () => {
 		return new Promise((resolve) => {
 			if (mainPanel.value) {
@@ -114,6 +96,17 @@
 		});
 	};
 
+	const handleRowClick = ({ record, index }) => {
+		emits('record-click', { record, index });
+	};
+
+
+  watch(pageIndex, () => {
+		emitter.emit('model-page-change', pageIndex.value);
+    scrollToTop();
+    setTimeout(handlePageChange, 500);
+  });
+
 	watch(currentModel, () => {
 		hidePanel().then(() => {
 			if (pageIndex.value === 1) {
@@ -125,7 +118,15 @@
 		});
 	});
 
-	const handleRowClick = ({ record, index }) => {
-		emits('record-click', { record, index });
-	};
+
+  onBeforeMount(() => {
+    setRecords([], 0);
+    setLoadRecordsError(null);
+  });
+
+  onMounted(() => {
+		emitter.on('load-table', (model) => {
+			currentModel.value = model;
+		});
+  });
 </script>

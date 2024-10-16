@@ -1,4 +1,5 @@
-const controller = require('./controllers.js');
+const controller = require('./controller');
+
 const express = require('express');
 
 const router = express.Router();
@@ -6,8 +7,6 @@ const router = express.Router();
 router.get('/', controller.getAll);
 
 router.get('/:id', controller.getOne);
-
-router.get('/:id/tracks', controller.getTracks);
 
 router.post('/', controller.create);
 

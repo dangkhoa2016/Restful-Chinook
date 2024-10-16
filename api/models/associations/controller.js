@@ -62,6 +62,7 @@ const handleSpecialCase = async (model, record, target, limit, offset, res) => {
     res.status(status).json(result);
     return true;
   }
+  
   return false;
 };
 
@@ -70,7 +71,7 @@ const handleHasMany = async (model, record, query, res) => {
 
   if (!target) return res.status(400).json({ message: 'Invalid target' });
 
-  if (await handleSpecialCase(model, record, target, limit, offset, res)) return;
+  if (await handleSpecialCase(model, record, target, limit, offset, res)) return null;
 
   if (!associationsMapping[model][target]) return res.status(400).json({ message: 'Invalid target' });
 
@@ -112,11 +113,12 @@ const controllers = {
     if (status !== 200) return res.status(status).json(result);
     if (!result) return res.status(404).json({ message: 'Not found' });
 
+    let query = null;
     switch (action) {
       case 'belongto':
         return handleBelongTo(model, result, res);
       case 'hasmany':
-        const query = { ...req.query };
+        query = { ...req.query };
         delete query.model;
         delete query.action;
         delete query.id;

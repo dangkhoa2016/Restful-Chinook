@@ -12,7 +12,7 @@ const tableName = 'invoices';
 
     // Display the column names
     const columnNames = columns.map(column => column.name);
-    console.log(`Columns of table '${tableName}':`, columnNames);
+    console.log(`Columns of table '${tableName}':`, columnNames); // skipcq: JS-0002
   });
 
   // Don't forget to close the database connection when done

@@ -50,13 +50,13 @@ app.get('*', (req, res) => {
   res.sendFile(indexHtml);
 });
 
-app.use(function (err, req, res, next) {
-  console.error(err.stack);
+app.use(async (err, req, res/*, next*/) => {
+  console.error(`[AppError: ${err.stack}`);
   res.status(500).end();
 });
 
 app.listen(config.PORT, () => {
-  console.log(
+  console.log( // skipcq: JS-0002
     `listening at http://localhost:${config.PORT} (${config.MODE} mode)`
   );
 });

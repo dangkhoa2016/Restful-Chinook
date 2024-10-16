@@ -29,16 +29,16 @@ const setBelongTos = (belongTos) => {
 
 const fetchBelongTos = async (token, model, id, abortToken) => {
   if (!model || !id)
-    return;
+    return null;
 
   setBelongTos(null);
   associationStore.loadingBelongTos = true;
   associationStore.loadBelongTosError = null;
   await sleep(1500);
 
-  if (abortToken && abortToken.reason) {
-    // console.log('Aborted fetch belongTos', model);
-    return;
+  if (abortToken?.reason) {
+    // console.log('fetchBelongTos: Aborted', model);
+    return null;
   }
 
   try {
@@ -48,20 +48,20 @@ const fetchBelongTos = async (token, model, id, abortToken) => {
         action: 'belongto',
       },
       headers: {
-        'x-access-token': `${token}`
+        'x-access-token': token
       },
       cancelToken: abortToken
     });
 
-    if (abortToken && abortToken.reason) {
-      // console.log('Aborted fetch belongTos', model);
-      return;
+    if (abortToken?.reason) {
+      // console.log('fetchBelongTos: Aborted', model);
+      return null;
     }
 
     const models = response.data || {};
     setBelongTos(models);
   } catch (ex) {
-    console.log('Error fetch belongTos', ex);
+    // console.log('Error fetch belongTos', ex);
     associationStore.loadBelongTosError = ex.message;
   }
 
@@ -80,16 +80,16 @@ const setHasManys = (hasManys) => {
 
 const fetchHasManys = async (token, model, id, abortToken) => {
   if (!model || !id)
-    return;
+    return null;
 
   setHasManys(null);
   associationStore.loadingHasManys = true;
   associationStore.loadHasManysError = null;
   // await sleep(10000);
 
-  if (abortToken && abortToken.reason) {
-    // console.log('Aborted fetch hasManys', model);
-    return;
+  if (abortToken?.reason) {
+    // console.log('fetchHasManys: Aborted', model);
+    return null;
   }
 
   try {
@@ -99,20 +99,20 @@ const fetchHasManys = async (token, model, id, abortToken) => {
         action: 'hasmany',
       },
       headers: {
-        'x-access-token': `${token}`
+        'x-access-token': token
       },
       cancelToken: abortToken
     });
 
-    if (abortToken && abortToken.reason) {
-      // console.log('Aborted fetch belongTos', model);
-      return;
+    if (abortToken?.reason) {
+      // console.log('fetchHasManys: Aborted', model);
+      return null;
     }
 
     const models = response.data || {};
     setHasManys(models);
   } catch (ex) {
-    console.log('Error fetch hasManys', ex);
+    // console.log('Error fetch hasManys', ex);
     associationStore.loadHasManysError = ex.message;
   }
 
@@ -133,16 +133,16 @@ const setHasManyTargetRecords = (records, targetTotalItems) => {
 
 const fetchHasManyTargets = async ({ token, model, id, target, limit, offset, abortToken }) => {
   if (!model || !id)
-    return;
+    return null;
 
   setHasManyTargetRecords(null, 0);
   associationStore.loadingHasManyTargets = true;
   associationStore.loadHasManyTargetsError = null;
   await sleep(1500);
 
-  if (abortToken && abortToken.reason) {
-    // console.log('Aborted fetch hasManyTargets', model);
-    return;
+  if (abortToken?.reason) {
+    // console.log('fetchHasManyTargets: Aborted', model);
+    return null;
   }
 
   try {
@@ -153,14 +153,14 @@ const fetchHasManyTargets = async ({ token, model, id, target, limit, offset, ab
         limit, offset,
       },
       headers: {
-        'x-access-token': `${token}`
+        'x-access-token': token
       },
       cancelToken: abortToken
     });
 
-    if (abortToken && abortToken.reason) {
-      // console.log('Aborted fetch belongTos', model);
-      return;
+    if (abortToken?.reason) {
+      // console.log('fetchHasManyTargets: Aborted', model);
+      return null;
     }
 
     const { rows = [], total: totalItems = 0, errors } = response.data || {};
@@ -169,7 +169,7 @@ const fetchHasManyTargets = async ({ token, model, id, target, limit, offset, ab
 
     setHasManyTargetRecords(rows, totalItems);
   } catch (ex) {
-    console.log('Error fetch hasManyTargets', ex);
+    // console.log('Error fetch hasManyTargets', ex);
     associationStore.loadHasManyTargetsError = ex.message;
   }
 

@@ -1,4 +1,5 @@
 <template>
+
   <transition name='just-fade' mode='out-in'>
     <LoadingBelongTo v-if='loadingHasManysRef || firstLoad' :id='`loading-${mainId}`' />
     <div v-else-if='loadHasManysErrorRef'>
@@ -34,6 +35,7 @@
       </div>
     </div>
   </transition>
+
 </template>
 
 <script>
@@ -47,6 +49,7 @@
 	import axios from 'axios';
   import changeCase from 'change-case';
   import pluralize from 'pluralize';
+
 	import {
     useAssociationStore,
 
@@ -60,11 +63,6 @@
   import AssociationModelTable from '/src/components/AssociationModelTable.vue';
 
 
-	const emitter = inject('emitter');
-  const currentModel = ref(null);
-  const firstLoad = ref(true);
-  const hasManyNav = ref(null);
-  const loadIndex = ref(0);
   const props = defineProps({
     modelId: {
       required: true,
@@ -77,6 +75,12 @@
     }
   });
 
+	const emitter = inject('emitter');
+  const currentModel = ref(null);
+  const firstLoad = ref(true);
+  const hasManyNav = ref(null);
+  const loadIndex = ref(0);
+  
   const {
     hasManys,
     loadingHasManys,
@@ -88,13 +92,14 @@
 	const cancelToken = ref(null);
   const isFetching = ref(false);
 
-  const getModelName = (model) => {
-    return changeCase.capitalCase(pluralize.singular(model));
-  };
-
+  
   const mainId = computed(() => {
     return currentModel.value ? `${currentModel.value}-${props.modelId}-${Math.floor(Math.random() * 1000)}` : '';
   });
+
+  const getModelName = (model) => {
+    return changeCase.capitalCase(pluralize.singular(model));
+  };
 
   const handleIdChange = () => {
 		if (!currentModel.value) return;
@@ -114,35 +119,11 @@
     if (props.isInsideModal)
       return;
 
-    console.log('scrolling to bottom');
     window.scroll({
       top: document.body.scrollHeight,
       behavior: 'smooth'
     });
   }
-
-  onBeforeUnmount(() => {
-    if (cancelToken.value)
-      cancelToken.value.cancel('[HasManyTab] onBeforeUnmount aborting previous request');
-
-    if (hasManyNav.value) {
-      hasManyNav.value.querySelectorAll('.nav-item').forEach((el) => {
-        el.removeEventListener('shown.bs.tab', handleTabChange);
-      });
-    }
-  });
-
-  onMounted(() => {
-		emitter.on('load-table', (model) => {
-      if (!getModal())
-        currentModel.value = model;
-		});
-
-    emitter.on('show-modal', ({ model }) => {
-      if (getModal())
-        currentModel.value = model;
-    });
-  });
 
   const handleTabChange = (event) => {
     const tab = event.target.getAttribute('aria-controls');
@@ -165,6 +146,7 @@
     return el ? el.closest('.modal') : null;
   };
 
+  
   watch(() => hasManys.value, (newVal) => {
     if (isFetching.value)
       hasManysRef.value = newVal;
@@ -200,18 +182,42 @@
     if (!newVal)
       return;
 
-    if (!hasManysRef.value || hasManysRef.value.length == 0)
+    if (!hasManysRef.value || hasManysRef.value.length === 0)
       handleIdChange();
     else
       setTimeout(() => { scrollToBottom(); }, 10);
   });
 
-  watch(() => currentModel.value, (newVal, oldVal) => {
+  watch(() => currentModel.value, (newVal) => {
     if (newVal) {
       loadIndex.value = 0;
       hasManysRef.value = [];
       loadingHasManysRef.value = false;
       loadHasManysErrorRef.value = null;
     }
+  });
+
+  
+  onBeforeUnmount(() => {
+    if (cancelToken.value)
+      cancelToken.value.cancel('[HasManyTab] onBeforeUnmount aborting previous request');
+
+    if (hasManyNav.value) {
+      hasManyNav.value.querySelectorAll('.nav-item').forEach((el) => {
+        el.removeEventListener('shown.bs.tab', handleTabChange);
+      });
+    }
+  });
+
+  onMounted(() => {
+		emitter.on('load-table', (model) => {
+      if (!getModal())
+        currentModel.value = model;
+		});
+
+    emitter.on('show-modal', ({ model }) => {
+      if (getModal())
+        currentModel.value = model;
+    });
   });
 </script>

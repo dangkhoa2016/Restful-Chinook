@@ -1,4 +1,5 @@
 <template>
+
   <div class='table-responsive'>
     <table :class='tableClass' class='table table-bordered mb-0 table-striped bsb-table-xl text-nowrap align-middle'>
       <thead>
@@ -36,6 +37,7 @@
       </tbody>
     </table>
   </div>
+
 </template>
 
 <script>
@@ -47,11 +49,12 @@
 <script setup>
   import { ref, computed } from 'vue';
   import changeCase from 'change-case';
+
   import RecordLoader from '/src/components/RecordLoader.vue';
   import ErrorLoadRecords from '/src/components/ErrorLoadRecords.vue';
   import RecordRow from '/src/components/RecordRow.vue';
-  const currentActiveRowIndex = ref(null);
 
+  
   const props = defineProps({
     records: {
       type: Array,
@@ -66,11 +69,15 @@
       default: [],
     },
     tableClass: {
+      default: '',
       type: String
     }
   });
 
+  const currentActiveRowIndex = ref(null);
+
   const emits = defineEmits(['row-click']);
+
 
   const tableHeaders = computed(() => {
     let headers = [];
@@ -86,6 +93,7 @@
       }
     });
   });
+
 
   const rowActive = (rowIndex) => rowIndex === currentActiveRowIndex.value;
 

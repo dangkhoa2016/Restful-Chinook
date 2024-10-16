@@ -1,39 +1,44 @@
 <template>
-  <div class='my-4' :class='isInsideModal ? "px-4" : null'>
-    <button class='btn btn-warning' type='button'
-      aria-expanded='false' @click.prevent='toggleAssociations'>
-      View associations
-    </button>
-  </div>
-  <div ref='collapseAssociationsTab'
-    class='collapse my-4'
-    :class='isInsideModal ? "mb-0" : null'
-    >
-    <nav class='nav nav-tabs justify-content-center mt-4'>
-      <li class='nav-item' role='presentation'>
-        <button class='nav-link' :class="{'active': showTab == 1}"
-          data-bs-toggle='tab' type='button' role='tab' aria-selected='true'
-          :data-bs-target='`#${belongToTabId}`'
-          :aria-controls='belongToTabId'>Belong to</button>
-      </li>
-      <li class='nav-item' role='presentation'>
-        <button class='nav-link' :class="{'active': showTab == 2}"
-          data-bs-toggle='tab' type='button' role='tab' aria-selected='false'
-          :data-bs-target='`#${hasManyTabId}`'
-          :aria-controls='hasManyTabId'>Has many</button>
-      </li>
-    </nav>
-    <div class='tab-content bg-white rounded'>
-      <div class='tab-pane fade p-4' :class="{'show active': showTab == 1}"
-        :id='belongToTabId' role='tabpanel' :aria-labelledby='belongToTabId'>
-        <BelongToTab :model-id='modelId' :load-data='showTab == 1' :is-inside-modal='isInsideModal' />
-      </div>
-      <div class='tab-pane fade p-4' :class="{'show active': showTab == 2}"
-        :id='hasManyTabId' role='tabpanel' :aria-labelledby='hasManyTabId'>
-        <HasManyTab :model-id='modelId' :load-data='showTab == 2' :is-inside-modal='isInsideModal' />
+
+  <div class='show-associations'>
+    <div class='my-4' :class='isInsideModal ? "px-4" : null'>
+      <button class='btn btn-warning' type='button'
+        aria-expanded='false' @click.prevent='toggleAssociations'>
+        View associations
+      </button>
+    </div>
+
+    <div ref='collapseAssociationsTab'
+      class='collapse my-4'
+      :class='isInsideModal ? "mb-0" : null'
+      >
+      <nav class='nav nav-tabs justify-content-center mt-4'>
+        <li class='nav-item' role='presentation'>
+          <button class='nav-link' :class="{'active': showTab == 1}"
+            data-bs-toggle='tab' type='button' role='tab' aria-selected='true'
+            :data-bs-target='`#${belongToTabId}`'
+            :aria-controls='belongToTabId'>Belong to</button>
+        </li>
+        <li class='nav-item' role='presentation'>
+          <button class='nav-link' :class="{'active': showTab == 2}"
+            data-bs-toggle='tab' type='button' role='tab' aria-selected='false'
+            :data-bs-target='`#${hasManyTabId}`'
+            :aria-controls='hasManyTabId'>Has many</button>
+        </li>
+      </nav>
+      <div class='tab-content bg-white rounded'>
+        <div class='tab-pane fade p-4' :class="{'show active': showTab == 1}"
+          :id='belongToTabId' role='tabpanel' :aria-labelledby='belongToTabId'>
+          <BelongToTab :model-id='modelId' :load-data='showTab == 1' :is-inside-modal='isInsideModal' />
+        </div>
+        <div class='tab-pane fade p-4' :class="{'show active': showTab == 2}"
+          :id='hasManyTabId' role='tabpanel' :aria-labelledby='hasManyTabId'>
+          <HasManyTab :model-id='modelId' :load-data='showTab == 2' :is-inside-modal='isInsideModal' />
+        </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -50,20 +55,58 @@
   import HasManyTab from '/src/components/HasManyTab.vue';
 
 
+  const props = defineProps({
+    modelId: {
+      default: '',
+      required: false,
+    },
+  });
+
+
 	const emitter = inject('emitter');
   const collapseAssociationsTab = ref(null);
   const collapseAssociationsJs = ref(null);
   const currentModel = ref(null);
-
-  const props = defineProps({
-    modelId: {
-      required: false,
-    },
-  });
   const showTab = ref(null);
   const belongToTabId = ref(null);
   const hasManyTabId = ref(null);
   const isInsideModal = ref(false);
+
+
+  const handleTabChange = (event) => {
+    const tab = event.target.getAttribute('aria-controls');
+    showTab.value = tab === belongToTabId.value ? 1 : 2;
+  };
+
+  const handleCollapseHide = () => {
+    showTab.value = null;
+  };
+
+  const toggleAssociations = () => {
+    collapseAssociationsJs.value.toggle();
+  };
+
+  const scrollToBottom = () => {
+    if (isInsideModal.value)
+      return;
+
+    window.scroll({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+
+  const handleCollapseShown = () => {
+    setTimeout(() => { scrollToBottom(); }, 10);
+    showTab.value = 1;
+  };
+
+
+  watch(() => props.modelId, (/* newValue, oldValue */) => {
+    collapseAssociationsJs.value.hide();
+    showTab.value = null;
+  });
+
 
   onMounted(() => {
     belongToTabId.value = 'belongto-tab-' + (new Date()).getTime() + Math.floor(Math.random() * 1000);
@@ -102,34 +145,6 @@
     isInsideModal.value = !!collapseAssociationsTab.value.closest('.modal-body');
   });
 
-  const handleTabChange = (event) => {
-    const tab = event.target.getAttribute('aria-controls');
-    showTab.value = tab === belongToTabId.value ? 1 : 2;
-  };
-
-  const handleCollapseHide = (event) => {
-    showTab.value = null;
-  };
-
-  const toggleAssociations = (ev) => {
-    collapseAssociationsJs.value.toggle();
-  };
-
-  const scrollToBottom = () => {
-    if (isInsideModal.value)
-      return;
-
-    window.scroll({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
-  }
-
-  const handleCollapseShown = (event) => {
-    setTimeout(() => { scrollToBottom(); }, 10);
-    showTab.value = 1;
-  };
-
   onBeforeUnmount(() => {
     collapseAssociationsTab.value.removeEventListener('shown.bs.collapse', handleCollapseShown);
     collapseAssociationsTab.value.removeEventListener('hide.bs.collapse', handleCollapseHide);
@@ -138,10 +153,4 @@
       el.removeEventListener('shown.bs.tab', handleTabChange);
     });
   });
-
-  watch(() => props.modelId, (newValue, oldValue) => {
-    collapseAssociationsJs.value.hide();
-    showTab.value = null;
-  });
-
 </script>

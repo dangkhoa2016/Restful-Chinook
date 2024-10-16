@@ -16,7 +16,8 @@
         <a href="#" class="page-link" @click.prevent="changePage(displayedPages[0] - 1)">...</a>
       </li>
 
-      <li v-for="pageNumber in displayedPages" :key="pageNumber" class="page-item" :class="{ 'active': modelValue === pageNumber }">
+      <li v-for="pageNumber in displayedPages" :key="pageNumber" class="page-item"
+        :class="{ 'active': modelValue === pageNumber }">
         <a href="#" class="page-link" @click.prevent="changePage(pageNumber)">{{ pageNumber }}</a>
       </li>
 
@@ -45,7 +46,6 @@
 </script>
 
 <script setup>
-
   import { computed, ref, } from 'vue';
 
 
@@ -72,6 +72,7 @@
   // Reactive state for currentPage (if needed for internal component logic)
   const currentPage = ref(props.modelValue);
 
+
   // Computed properties
   const totalPages = computed(() => {
     return Math.ceil(props.totalItems / props.itemsPerPage);
@@ -95,5 +96,4 @@
       currentPage.value = pageNumber; // Update currentPage if it's used internally
     }
   };
-
 </script>

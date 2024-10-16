@@ -1,14 +1,13 @@
 <template>
-  <!-- list of models -->
+
   <ul class='list-group'>
-    <template v-for='(item, index) in listModels' :key='index'>
-      <li :class='itemClasses(item.id)'>
-        <span class='model-name'>{{ item.name }}</span>
-        <button class='btn btn-primary show-records text-nowrap ms-1'
-          @click.prevent="loadTable(item.id)">Show Records</button>
-      </li>
-    </template>
+    <li v-for='(item, index) in listModels' :key='index' :class='itemClass(item.id)'>
+      <span class='model-name'>{{ item.name }}</span>
+      <button class='btn btn-primary show-records text-nowrap ms-1'
+        @click.prevent="loadTable(item.id)">Show Records</button>
+    </li>
   </ul>
+
 </template>
 
 <script>
@@ -18,20 +17,11 @@
 </script>
 
 <script setup>
-
   import { ref, inject, } from 'vue';
-  const emitter = inject('emitter');
 
+
+  const emitter = inject('emitter');
   const currentModel = ref(null);
-  const itemClasses = (model) => {
-    return {
-      'list-group-item d-flex': true,
-      'justify-content-between': true,
-      'align-items-center text-nowrap': true,
-      'px-2': true,
-      'bg-warning': model === currentModel.value,
-    }
-  }
 
   const listModels = [
     { id: 'albums', name: 'Albums' },
@@ -46,11 +36,21 @@
     { id: 'tracks', name: 'Tracks' }
   ];
 
+
+  const itemClass = (model) => {
+    return {
+      'list-group-item d-flex': true,
+      'justify-content-between': true,
+      'align-items-center text-nowrap': true,
+      'px-2': true,
+      'bg-warning': model === currentModel.value,
+    }
+  }
+
   const loadTable = (model) => {
     if (!model) return
 
     currentModel.value = model;
     emitter.emit('load-table', model);
   }
-
 </script>

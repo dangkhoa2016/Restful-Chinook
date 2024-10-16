@@ -1,80 +1,9 @@
 import { formatDateTime, isDate } from './dateTimeHelpers.mjs';
 import currencyJs from 'currency.js';
 import pluralize from 'pluralize';
-const USD = value => currencyJs(value, { symbol: '$ ', precision: 2 });
+const decimalRegex = /^-?\d*\.\d+$/;
 
-const renderValue = (model, field, value, index) => {
-  // console.log('renderValue', model, field, value, index);
-  switch (model) {
-    case 'albums':
-      switch (field) {
-        case 'album_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'artists':
-      switch (field) {
-        case 'artist_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'customers':
-      switch (field) {
-        case 'customer_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'employees':
-      return renderEmployerValue(value, field, index);
-    case 'genres':
-      switch (field) {
-        case 'genre_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'invoices':
-      return renderInvoiceValue(value, field, index);
-    case 'invoice_lines':
-    case 'invoice-lines':
-      switch (field) {
-        case 'invoice_line_id':
-          return value;
-        case 'unit_price':
-          return USD(value).format();
-        default:
-          return value;
-      }
-      case 'media_types':
-      case 'media-types':
-      switch (field) {
-        case 'media_type_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'playlists':
-      switch (field) {
-        case 'playlist_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'playlists-tracks':
-    case 'playlists_tracks':
-      switch (field) {
-        case 'playlist_id':
-          return value;
-        default:
-          return value;
-      }
-    case 'tracks':
-      return renderTrackValue(value, field, index);
-  }
-};
+const USD = value => currencyJs(value, { symbol: '$ ', precision: 2 });
 
 const renderEmployerValue = (value, key/*, index*/) => {
   // console.log('renderEmployerValue', value, key, index);
@@ -87,7 +16,7 @@ const renderEmployerValue = (value, key/*, index*/) => {
     default:
       return value;
   }
-}
+};
 
 const renderInvoiceValue = (value, key/*, index*/) => {
   // console.log('renderInvoiceValue', value, key, index);
@@ -101,7 +30,7 @@ const renderInvoiceValue = (value, key/*, index*/) => {
     default:
       return value;
   }
-}
+};
 
 const renderTrackValue = (value, key/*, index*/) => {
   // console.log('renderTrackValue', value, key, index);
@@ -122,8 +51,6 @@ function isValidDate(field, value) {
   return false;
 }
 
-const decimalRegex = /^-?\d*\.\d+$/;
-
 function isDecimal(field, value) {
   if (field)
     return field.includes('price') || field.includes('total');
@@ -132,7 +59,9 @@ function isDecimal(field, value) {
     return Number.isInteger(value);
   else if (typeof value === 'string')
     return decimalRegex.test(value);
-}
+
+  return false;
+};
 
 function getBootstrapTextColor(field, value) {
   if (isValidDate(field, value))
@@ -168,7 +97,7 @@ function getBootstrapTextColor(field, value) {
     
   // return 'text-muted'; // Fallback for other types
   return '';
-}
+};
 
 function renderMilliseconds(value) {
   let seconds = Math.floor(value / 1000);
@@ -177,7 +106,7 @@ function renderMilliseconds(value) {
   seconds = seconds % 60;
   seconds = seconds > 0 ? `${seconds} ${pluralize('second', seconds)}` : '';
   return `${minutes} ${seconds}`.trim();
-}
+};
 
 function renderBytes(value) {
   if (value < 1024)
@@ -188,7 +117,82 @@ function renderBytes(value) {
     return `${(value / 1048576).toFixed(2)} MB`;
   else
     return `${(value / 1073741824).toFixed(2)} GB`;
-}
+};
+
+const renderValue = (model, field, value/*, index*/) => {
+  // console.log('renderValue', model, field, value, index);
+  switch (model) {
+    case 'albums':
+      switch (field) {
+        case 'album_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'artists':
+      switch (field) {
+        case 'artist_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'customers':
+      switch (field) {
+        case 'customer_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'employees':
+      return renderEmployerValue(value, field/*, index*/);
+    case 'genres':
+      switch (field) {
+        case 'genre_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'invoices':
+      return renderInvoiceValue(value, field/*, index*/);
+    case 'invoice_lines':
+    case 'invoice-lines':
+      switch (field) {
+        case 'invoice_line_id':
+          return value;
+        case 'unit_price':
+          return USD(value).format();
+        default:
+          return value;
+      }
+      case 'media_types':
+      case 'media-types':
+      switch (field) {
+        case 'media_type_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'playlists':
+      switch (field) {
+        case 'playlist_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'playlists-tracks':
+    case 'playlists_tracks':
+      switch (field) {
+        case 'playlist_id':
+          return value;
+        default:
+          return value;
+      }
+    case 'tracks':
+      return renderTrackValue(value, field/*, index*/);
+  }
+
+  return value;
+};
 
 
 export {

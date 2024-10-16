@@ -1,4 +1,5 @@
 <template>
+
   <transition name='just-fade' mode='out-in'>
     <LoadingBelongTo v-if='(loadData && loadingRecords) || modelIdChanged' />
     <div v-else-if='loadData && loadError'>
@@ -21,6 +22,7 @@
 				:items-per-page='itemsPerPage' />
     </div>
   </transition>
+
 </template>
 
 <script>
@@ -30,8 +32,9 @@
 </script>
 
 <script setup>
-  import { ref, inject, watch, computed, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue';
   import axios from 'axios';  
+
   import {
     useAssociationStore,
     fetchHasManyTargets,
@@ -45,6 +48,7 @@
   import Pagination from '/src/components/Pagination.vue';
 	import RenderColumn from '/src/components/RenderColumn.vue';
 
+
   const props = defineProps({
     modelId: {
       required: true,
@@ -52,20 +56,24 @@
     target: {
       type: String,
       required: false,
+      default: '',
     },
     currentModel: {
+      default: '',
       type: String,
     },
     loadData: {
       type: Boolean,
     },
   });
+
   const itemsPerPage = 10;
   const pageIndex = ref(1);
   const {
     hasManyTargetRecords, loadingHasManyTargets,
     targetTotalItems = 0, loadHasManyTargetsError
   } = useAssociationStore();
+
   const cancelToken = ref(null);
   const modelIdChanged = ref(true);
   const tableData = ref([]);
@@ -76,6 +84,40 @@
   const uniqueId = computed(() => {
     return `${props.currentModel}-${props.target}-${props.modelId}`;
   });
+
+  /*
+  const isInsideModal = computed(() => {
+    const el = document.getElementById(uniqueId.value);
+    return el ? !!el.closest('.modal') : false;
+  });
+  */
+
+
+  const scrollToTop = (position) => {
+    const el = document.getElementById(uniqueId.value);
+    if (!el) return;
+
+    const modal = el.closest('.modal');
+    if (modal) {
+      modal.scroll({
+        top: el.offsetTop + position,
+        behavior: 'smooth'
+      });
+    } else
+      window.scrollTo(0, el.offsetTop + position);
+  };
+
+  const scrollToBottom = () => {
+    /*
+    if (isInsideModal.value)
+      return;
+
+    window.scroll({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+    */
+  };
 
   const handleIdChange = () => {
     if (!props.currentModel) return;
@@ -102,38 +144,6 @@
     });
   };
 
-  const scrollToTop = (position) => {
-    const el = document.getElementById(uniqueId.value);
-    if (!el) return;
-
-    const modal = el.closest('.modal');
-    if (modal) {
-      modal.scroll({
-        top: el.offsetTop + position,
-        behavior: 'smooth'
-      });
-    } else
-      window.scrollTo(0, el.offsetTop + position);
-  };
-
-  /*
-  const isInsideModal = computed(() => {
-    const el = document.getElementById(uniqueId.value);
-    return el ? !!el.closest('.modal') : false;
-  });
-  */
-
-  const scrollToBottom = () => {
-    /*
-    if (isInsideModal.value)
-      return;
-
-    window.scroll({
-      top: document.body.scrollHeight,
-      behavior: 'smooth'
-    });
-    */
-  }
 
   watch(pageIndex, handleIdChange);
 
@@ -172,12 +182,13 @@
       cancelToken.value.cancel('[AssociationModelTable] onBeforeUnmount aborting previous request');
   });
 
-  watch(() => props.modelId, (newVal) => {
+  watch(() => props.modelId, () => {
     tableData.value = []
     loadError.value = null;
     modelIdChanged.value = true;
     pageIndex.value = 1;
   });
+
 
   onMounted(() => {
     if (props.loadData) {

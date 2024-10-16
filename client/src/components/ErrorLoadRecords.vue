@@ -36,10 +36,7 @@
 </script>
 
 <script setup>
-
   import { ref, onMounted } from 'vue';
-
-  const folder = '/src/assets/images';
 
   defineProps({
     message: {
@@ -57,8 +54,8 @@
     },
   });
 
+  const folder = '/src/assets/images';
   const emits = defineEmits(['reload']);
-
   const imageFiles = 6;
   const imageFile = ref(null);
 
@@ -66,5 +63,4 @@
   onMounted(() => {
     imageFile.value = `${folder}/error${Math.floor(Math.random() * imageFiles) + 1}.png`;
   });
-
 </script>
