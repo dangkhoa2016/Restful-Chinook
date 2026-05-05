@@ -2,7 +2,7 @@ import fs from 'fs';
 import Papa from 'papaparse';
 import { tableize, underscore } from 'inflection';
 import { fileURLToPath } from 'url';
-import { path, dirname } from 'path';
+import path, { dirname } from 'path';
 
 import dbHelpers from '../api/libs/db-helpers.js';
 

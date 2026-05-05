@@ -40,7 +40,4 @@ router.use('/associations', require('./models/associations'));
 // router.use('/user-track-top-user-skipped', require('./models/user-track-top-user-skipped'));
 // router.use('/user-track-top-user-starred', require('./models/user-track-top-user-starred'));
 // router.use('/user-track-top-user-unrated', require('./models/user-track-top-user-unrated'));
-router.use('/customers', require('./models/customers'));
-
-
 module.exports = router;
