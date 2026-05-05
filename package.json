@@ -14,15 +14,18 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
-    "express": "^4.22.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "helmet": "^8.1.0",
     "inflection": "^3.0.2",
+    "joi": "^18.2.1",
     "morgan": "^1.10.1",
     "papaparse": "^5.5.3",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^6.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.14"
   }
 }
