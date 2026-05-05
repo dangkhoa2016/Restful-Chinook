@@ -4,17 +4,20 @@ const fs = require('fs');
 const path = require('path');
 
 const express = require('express');
-const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const config = require('./config');
 const api = require('./api');
+const errorHandler = require('./api/libs/error-handler');
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // log to file
 app.use(morgan('combined', {
@@ -50,10 +53,8 @@ app.get('*', (req, res) => {
   res.sendFile(indexHtml);
 });
 
-app.use((err, req, res/*, next*/) => {
-  console.error(`[AppError: ${err.stack}`);
-  res.status(500).end();
-});
+// Error handling middleware should be last
+app.use(errorHandler);
 
 app.listen(config.PORT, () => {
   console.log( // skipcq: JS-0002
